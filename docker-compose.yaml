@@ -1,0 +1,61 @@
+services:
+
+  api:
+    build: .
+    restart: always
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    ports:
+      - 8000:8000
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    depends_on:
+      - postgres
+#      - redis
+    networks:
+      - default
+    container_name: 'middle_practicum_api'
+
+  postgres:
+    image: huecker.io/library/postgres:16.0
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+    networks:
+      - default
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+    container_name: 'middle_practicum_auth_postgres'
+
+#  redis:
+#    image: redis:latest
+#    healthcheck:
+#      test: [ "CMD", "redis-cli", "ping" ]
+#      interval: 10s
+#    environment:
+#      - REDIS_HOST=redis
+#      - REDIS_PORT=6379
+#    ports:
+#      - 6380:6379
+#    networks:
+#      - default
+#    container_name: 'middle_practicum_auth_redis'
+
+#  nginx:
+#    entrypoint: [ "echo", "Service nginx disabled in dev mode" ]
+
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.57.0/24
