@@ -4,20 +4,22 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from redis import Redis
 
 from api.v1.routers import main_router
 from core.config import app_settings
 from core.logger import LOGGING
+from db import redis
 from db.postgres import create_database, purge_database
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await create_database()  # TODO только для отладки приложения
-    # redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
+    redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
     yield
     await purge_database()  # TODO только для отладки приложения
-    # await redis.redis.close()
+    await redis.redis.close()
 
 
 app = FastAPI(
