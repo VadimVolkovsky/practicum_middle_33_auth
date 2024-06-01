@@ -1,0 +1,1 @@
+from api.v1.endpoints.auth import router as auth_router  # noqa: F403,F401
