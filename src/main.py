@@ -11,11 +11,13 @@ from core.config import app_settings
 from core.logger import LOGGING
 from db import redis
 from db.postgres import create_database, purge_database
+from models.entity import add_default_roles
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await create_database()  # TODO только для отладки приложения
+    await add_default_roles()  # TODO только для отладки приложения
     redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
     yield
     await purge_database()  # TODO только для отладки приложения
