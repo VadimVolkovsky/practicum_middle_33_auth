@@ -11,6 +11,11 @@ class UserCreate(BaseModel):
     last_name: str
 
 
+class UserLogin(BaseModel):
+    login: str
+    password: str
+
+
 class UserInDB(BaseModel):
     """UserInDB — это то, что мы будем отдавать пользователю — детальную информацию по нужным полям модели. """
     id: UUID
