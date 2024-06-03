@@ -8,9 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import AppSettings
 from core.schemas.entity import UserInDB, UserCreate, UserLogin
-from crud.user import user_crud
 from db.postgres import get_session
 from models.entity import User
+from services.user import user_service
 
 router = APIRouter()
 
@@ -41,7 +41,7 @@ async def login(user: UserLogin, authorize: AuthJWT = Depends(), session: AsyncS
     Эндпоинт авторизации пользователя по логину и паролю.
     В случае усешной авторизации создаются access и refresh токены
     """
-    if not await user_crud.check_user_credentials(user.login, user.password, session):
+    if not await user_service.check_user_credentials(user.login, user.password, session):
         raise HTTPException(status_code=401,detail="Bad username or password")
 
     access_token = await authorize.create_access_token(subject=user.login)
