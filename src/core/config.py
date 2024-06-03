@@ -23,6 +23,8 @@ class AppSettings(BaseSettings):
     redis_host: str = Field(default='redis')
     redis_port: int = Field(default=6379)
 
+    authjwt_secret_key: str = "secret"
+
     class Config:
         env_file = '.env'
 
