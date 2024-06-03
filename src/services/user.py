@@ -1,8 +1,9 @@
+from async_fastapi_jwt_auth import AuthJWT
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession
 from werkzeug.security import check_password_hash
 
-from core.schemas.entity import UserCreate
+from core.schemas.entity import UserCreate, UserLogin
 from crud.user import user_crud
 from models.entity import User
 
@@ -23,6 +24,16 @@ class UserService:
                 return True
         return False
 
+    async def create_access_token(self, user: UserLogin, authorize: AuthJWT):
+        return await authorize.create_access_token(subject=user.login)
+
+    async def create_refresh_token(self, user: UserLogin, authorize: AuthJWT):
+        return await authorize.create_refresh_token(subject=user.login)
+
+    async def generate_new_jwt_tokens(self, user: UserLogin, authorize: AuthJWT):
+        access_token = await self.create_access_token(user, authorize)
+        refresh_token = await self.create_refresh_token(user, authorize)
+        return {"access_token": access_token, "refresh_token": refresh_token}
 
 
 user_service = UserService()

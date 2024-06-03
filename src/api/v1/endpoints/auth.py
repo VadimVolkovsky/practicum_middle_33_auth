@@ -31,9 +31,7 @@ async def login(user: UserLogin, authorize: AuthJWT = Depends(), session: AsyncS
     if not await user_service.check_user_credentials(user.login, user.password, session):
         raise HTTPException(status_code=401,detail="Bad username or password")
 
-    access_token = await authorize.create_access_token(subject=user.login)
-    refresh_token = await authorize.create_refresh_token(subject=user.login)
-    return {"access_token": access_token, "refresh_token": refresh_token}
+    return await user_service.generate_new_jwt_tokens(user, authorize)
 
 
 
