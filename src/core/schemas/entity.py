@@ -24,3 +24,8 @@ class UserInDB(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class JWTResponse(BaseModel):
+    access_token: str
+    refresh_token: str

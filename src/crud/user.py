@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from crud.base import CRUDBase
 from models.entity import User
@@ -6,6 +7,12 @@ from models.entity import User
 
 class CRUDUser(CRUDBase):
     """Круд класс для управления моделью User"""
+
+    async def create_user(self, user: User, session: AsyncSession) -> User:
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+        return user
 
     async def get_user_by_login(self, login, session) -> User | None:
         """Метод получения объекта пользователя из БД по логину"""
