@@ -19,8 +19,8 @@ class UserLogin(BaseModel):
 
 class UserUpdate(BaseModel):
     """Модель обновления данных пользователя"""
-    login: str | None
-    password: str | None
+    login: str | None = None
+    password: str | None = None
 
 
 class UserInDB(BaseModel):
