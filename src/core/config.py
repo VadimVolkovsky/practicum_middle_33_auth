@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
-
 load_dotenv()
 
 
@@ -24,6 +23,10 @@ class AppSettings(BaseSettings):
     redis_port: int = Field(default=6379)
 
     authjwt_secret_key: str = "secret"
+    authjwt_denylist_enabled: bool = True
+    authjwt_denylist_token_checks: set = {"access", "refresh"}
+    access_expires: int = 3600
+    refresh_expires: int = 86400
 
     class Config:
         env_file = '.env'
