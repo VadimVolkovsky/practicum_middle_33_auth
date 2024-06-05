@@ -1,6 +1,7 @@
 from functools import lru_cache
+from http import HTTPStatus
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,12 +15,18 @@ from services.redis import get_redis
 
 class UserService:
     """Класс для хранения бизнес-логики модели User"""
+
     def __init__(self, redis: Redis):
         self.redis = redis
 
     async def create_user(self, user_create: UserCreate, session: AsyncSession):
+        """Метод для регистрации нового пользователя"""
         user_dto = jsonable_encoder(user_create)
         user = User(**user_dto)
+        user_obj = await user_crud.get_user_by_login(user.login, session)
+        if user_obj:
+            raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+                                detail=f"Login '{user.login}' is already in use")
         return await user_crud.create_user(user, session)
 
     async def check_user_credentials(self, login, password, session) -> bool:
