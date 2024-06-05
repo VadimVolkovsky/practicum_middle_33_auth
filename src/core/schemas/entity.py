@@ -12,8 +12,15 @@ class UserCreate(BaseModel):
 
 
 class UserLogin(BaseModel):
+    """Модель для работы с аутентификацией пользователя"""
     login: str
     password: str
+
+
+class UserUpdate(BaseModel):
+    """Модель обновления данных пользователя"""
+    login: str | None
+    password: str | None
 
 
 class UserInDB(BaseModel):
@@ -27,5 +34,6 @@ class UserInDB(BaseModel):
 
 
 class JWTResponse(BaseModel):
+    """Модель для работы с токенами"""
     access_token: str
     refresh_token: str

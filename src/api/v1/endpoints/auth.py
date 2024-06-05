@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import AppSettings, app_settings
-from core.schemas.entity import UserInDB, UserCreate, UserLogin, JWTResponse
+from core.schemas.entity import UserInDB, UserCreate, UserLogin, JWTResponse, UserUpdate
 from db.postgres import get_session
 from services import redis
 from services.user import get_user_service, UserService
@@ -28,19 +28,22 @@ async def check_if_token_in_denylist(decrypted_token):
 
 
 @router.post('/signup', response_model=UserInDB, status_code=HTTPStatus.CREATED)
-async def create_user(user_create: UserCreate,
-                      user_service: UserService = Depends(get_user_service),
-                      session: AsyncSession = Depends(get_session)
-                      ) -> UserInDB:
+async def create_user(
+        user_create: UserCreate,
+        user_service: UserService = Depends(get_user_service),
+        session: AsyncSession = Depends(get_session)
+) -> UserInDB:
     """Эндпоинт создания нового пользователя"""
     return await user_service.create_user(user_create, session)
 
 
 @router.post('/login', response_model=JWTResponse, status_code=HTTPStatus.CREATED)
-async def login(user: UserLogin,
-                user_service: UserService = Depends(get_user_service),
-                authorize: AuthJWT = Depends(), session: AsyncSession = Depends(get_session)
-                ):
+async def login(
+        user: UserLogin,
+        user_service: UserService = Depends(get_user_service),
+        authorize: AuthJWT = Depends(),
+        session: AsyncSession = Depends(get_session)
+):
     """
     Эндпоинт авторизации пользователя по логину и паролю.
     В случае усешной авторизации создаются access и refresh токены
@@ -105,3 +108,25 @@ async def refresh_revoke(
     jti = raw_jwt['jti']
     await user_service.redis.setex(jti, app_settings.refresh_expires, 'true')
     return {"detail": "Refresh token has been revoke"}
+
+
+@router.post('/user_update', status_code=HTTPStatus.OK)
+async def change_user_data(
+        user_input_data: UserUpdate,
+        authorize: AuthJWT = Depends(),
+        user_service: UserService = Depends(get_user_service),
+        session: AsyncSession = Depends(get_session)
+):
+    """Эндпоинт для обновления данных пользователя"""
+    await authorize.jwt_refresh_token_required()
+
+    # Обновляем данные пользователя в БД
+    raw_jwt = await authorize.get_raw_jwt()
+    user_login = raw_jwt['sub']
+    await user_service.update_user_info(user_input_data, user_login, session)
+
+    # Деактивируем рефреш токен чобы пользователь заново залогинился (сейчас можно изменять только ключевые поля - логин или пароль)
+    jti = raw_jwt['jti']
+    await user_service.redis.setex(jti, app_settings.refresh_expires, 'true')
+
+    return {"detail": "Data were updated successfully"}
