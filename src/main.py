@@ -5,15 +5,15 @@ import uvicorn
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi import FastAPI, Request
 from fastapi.responses import ORJSONResponse
-from redis import Redis
+from redis.asyncio import Redis
 from starlette.responses import JSONResponse
 
 from api.v1.routers import main_router
 from core.config import app_settings
 from core.logger import LOGGING
-from db import redis
 from db.postgres import create_database, purge_database
 from models.entity import add_default_roles
+from services import redis
 
 
 @asynccontextmanager

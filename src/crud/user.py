@@ -6,7 +6,7 @@ from models.entity import User
 
 
 class CRUDUser(CRUDBase):
-    """Круд класс для управления моделью User"""
+    """Класс для работы с моделью User в БД"""
 
     async def create_user(self, user: User, session: AsyncSession) -> User:
         session.add(user)

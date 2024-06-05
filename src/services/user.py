@@ -1,15 +1,21 @@
-from async_fastapi_jwt_auth import AuthJWT
+from functools import lru_cache
+
+from fastapi import Depends
 from fastapi.encoders import jsonable_encoder
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from werkzeug.security import check_password_hash
 
-from core.schemas.entity import UserCreate, UserLogin
+from core.schemas.entity import UserCreate
 from crud.user import user_crud
 from models.entity import User
+from services.redis import get_redis
 
 
 class UserService:
     """Класс для хранения бизнес-логики модели User"""
+    def __init__(self, redis: Redis):
+        self.redis = redis
 
     async def create_user(self, user_create: UserCreate, session: AsyncSession):
         user_dto = jsonable_encoder(user_create)
@@ -24,16 +30,13 @@ class UserService:
                 return True
         return False
 
-    async def create_access_token(self, user: UserLogin, authorize: AuthJWT):
-        return await authorize.create_access_token(subject=user.login)
 
-    async def create_refresh_token(self, user: UserLogin, authorize: AuthJWT):
-        return await authorize.create_refresh_token(subject=user.login)
-
-    async def generate_new_jwt_tokens(self, user: UserLogin, authorize: AuthJWT):
-        access_token = await self.create_access_token(user, authorize)
-        refresh_token = await self.create_refresh_token(user, authorize)
-        return {"access_token": access_token, "refresh_token": refresh_token}
-
-
-user_service = UserService()
+@lru_cache()
+def get_user_service(
+        redis: Redis = Depends(get_redis)
+) -> UserService:
+    """
+    Провайдер UserService
+    Используем lru_cache-декоратор, чтобы создать объект сервиса в едином экземпляре (синглтона)
+    """
+    return UserService(redis)
