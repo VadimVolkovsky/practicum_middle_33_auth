@@ -46,7 +46,7 @@ async def login(user: UserLogin,
     В случае усешной авторизации создаются access и refresh токены
     """
     if not await user_service.check_user_credentials(user.login, user.password, session):
-        raise HTTPException(status_code=401, detail="Bad username or password")
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Bad username or password")
     access_token = await authorize.create_access_token(subject=user.login)
     refresh_token = await authorize.create_refresh_token(subject=user.login)
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)
