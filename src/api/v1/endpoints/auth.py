@@ -52,6 +52,19 @@ async def login(user: UserLogin,
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)
 
 
+@router.post('/logout', status_code=HTTPStatus.OK)
+async def logout(  # TODO нужно ли обнулять все токены юзера со всех устройств ?
+        user_service: UserService = Depends(get_user_service),
+        authorize: AuthJWT = Depends(),
+):
+    """Эндпоинт разлогинивания пользователя путем добавления его refresh токена в блэк-лист Redis"""
+    await authorize.jwt_refresh_token_required()
+    raw_jwt = await authorize.get_raw_jwt()
+    jti = raw_jwt['jti']
+    await user_service.redis.setex(jti, app_settings.refresh_expires, 'true')
+    return {"detail": "Logged out successfully"}
+
+
 @router.post('/refresh')
 async def refresh(authorize: AuthJWT = Depends()):
     """
@@ -69,7 +82,7 @@ async def access_revoke(
         authorize: AuthJWT = Depends(),
         user_service: UserService = Depends(get_user_service)):
     """
-    Эндпоинт деактивации access токена путем добавления его в блек-лист Redis.
+    Эндпоинт деактивации access токена путем добавления его в блэк-лист Redis.
     По истечении срока действия токена, он автоматически удаляется из Redis
     """
     await authorize.jwt_required()
