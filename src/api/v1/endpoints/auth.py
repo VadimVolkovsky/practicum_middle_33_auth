@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import AppSettings, app_settings
-from core.schemas.entity import UserInDB, UserCreate, UserLogin, JWTResponse, UserUpdate
+from core.schemas.entity import UserInDB, UserCreate, UserLogin, JWTResponse, UserUpdate, UserLoginHistoryInDB
 from db.postgres import get_session
 from services import redis
 from services.user import get_user_service, UserService
@@ -52,6 +52,7 @@ async def login(
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Bad username or password")
     access_token = await authorize.create_access_token(subject=user.login)
     refresh_token = await authorize.create_refresh_token(subject=user.login)
+    await user_service.add_user_login_history(user.login, session)
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)
 
 
@@ -130,3 +131,17 @@ async def change_user_data(
     await user_service.redis.setex(jti, app_settings.refresh_expires, 'true')
 
     return {"detail": "Data were updated successfully"}
+
+
+@router.get('/user_login_history', response_model=UserLoginHistoryInDB, status_code=HTTPStatus.OK)
+async def get_user_login_history(
+        authorize: AuthJWT = Depends(),
+        user_service: UserService = Depends(get_user_service),
+        session: AsyncSession = Depends(get_session)
+):
+    await authorize.jwt_required()
+    user_login = await authorize.get_jwt_subject()
+    user = await user_service.get_user_by_login(user_login, session)
+    return await user_service.get_user_login_history(user, session)
+
+

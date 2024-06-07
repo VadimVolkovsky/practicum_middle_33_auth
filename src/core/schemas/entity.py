@@ -1,3 +1,4 @@
+import datetime
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -31,6 +32,17 @@ class UserInDB(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class UserLoginHistory(BaseModel):
+    user: UUID
+
+
+class UserLoginHistoryInDB(BaseModel):
+    """
+    UserLoginHistoryInDB — это то, что мы будем отдавать пользователю — детальную информацию по нужным полям модели.
+    """
+    login_date: list[datetime.datetime]
 
 
 class JWTResponse(BaseModel):

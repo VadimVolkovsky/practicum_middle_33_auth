@@ -61,4 +61,12 @@ class User(Base):
         return f'<User {self.login}>'
 
 
+class UserLoginHistory(Base):
+    __tablename__ = 'user_login_history'
 
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    user: Mapped[User] = mapped_column(ForeignKey('users.id'), nullable=False)
+    login_date: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow)
+
+    def __init__(self, user: User) -> None:
+        self.user = user
