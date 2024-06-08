@@ -11,7 +11,7 @@ ps:
 	$(DOCKER_COMPOSE) ps
 
 up:
-	$(DOCKER_COMPOSE) up
+	$(DOCKER_COMPOSE) up -d
 
 restart:
 	$(DOCKER_COMPOSE) restart
@@ -28,3 +28,8 @@ shell:
 flake8:
 	$(EXEC_CORE) flake8
 
+test:
+	$(DOCKER_COMPOSE) -f docker-compose_test.yml up
+
+test_bash:
+	$(DOCKER_COMPOSE) -f docker-compose_test.yml exec api bash
