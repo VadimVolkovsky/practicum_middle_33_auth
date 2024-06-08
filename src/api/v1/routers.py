@@ -6,8 +6,8 @@ main_router = APIRouter()
 
 main_router.include_router(
     auth_router,
-    prefix='/auth',
-    tags=['Auth'],
+    prefix='/role',
+    tags=['Role'],
 )
 main_router.include_router(
     role_router,

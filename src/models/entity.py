@@ -48,9 +48,9 @@ class User(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow)  # TODO заменить datetime на актуальный аналог
     role: Mapped[Role] = mapped_column(ForeignKey('roles.id'), default=1)
 
-    def __init__(self, login: str, password: str, first_name: str, last_name: str, role: Role = None) -> None:
+    def __init__(self, login: str, password: str, first_name: str, last_name: str, role: int = None) -> None:
         self.login = login
-        self.password = self.password = generate_password_hash(password)
+        self.password = password = generate_password_hash(password)
         self.first_name = first_name
         self.last_name = last_name
         self.role = role

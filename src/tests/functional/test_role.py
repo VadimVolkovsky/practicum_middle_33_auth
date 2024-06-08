@@ -7,11 +7,11 @@ from models.entity import Role
 
 
 @pytest.mark.asyncio
-async def test_get_roles(superuser_authenticated_client, test_db_session, roles):
-    db_roles = (await test_db_session.scalars(select(Role))).all()
-    expected_roles = [{"id": role.id, "name": role.name, "access_level": role.access_level} for role in db_roles]
+async def test_get_roles(admin_authenticated_client, db_session, roles):
+    db_roles = (await db_session.scalars(select(Role))).all()
+    expected_roles = [{"id": role.id, "name": role.name} for role in db_roles]
 
-    response = await superuser_authenticated_client.get("/role/")
+    response = await admin_authenticated_client.get('/role')
 
     assert response.status_code == HTTPStatus.OK
 
@@ -24,7 +24,7 @@ async def test_get_roles(superuser_authenticated_client, test_db_session, roles)
 
 
 @pytest.mark.asyncio
-async def test_cant_create_existing_role(superuser_authenticated_client, test_db_session):
-    response = await superuser_authenticated_client.post("/role/create", json={'name': 'testrole', 'access_level': 1})
+async def test_cant_create_existing_role(admin_authenticated_client, db_session):
+    response = await admin_authenticated_client.post("/role/create", json={'name': 'testrole', 'access_level': 1})
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
