@@ -1,4 +1,4 @@
-FROM huecker.io/library/python:3.12
+FROM python:3.12
 
 RUN mkdir /app
 
@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONPATH /app/src
 
 RUN  pip install --upgrade pip \
-     && pip install -r /app/requirements.txt
+     && pip install --no-cache-dir -r /app/requirements.txt
 
 COPY  src /app/src
 
