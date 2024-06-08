@@ -21,7 +21,7 @@ class CRUDBase:
         )
         return db_obj.scalars().first()
 
-    async def get_multi(
+    async def get_list(
             self,
             session: AsyncSession
     ):
