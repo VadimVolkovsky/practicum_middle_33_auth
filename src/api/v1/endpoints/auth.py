@@ -8,7 +8,7 @@ from core.config import AppSettings, app_settings
 from core.schemas.entity import UserInDB, UserCreate, UserLogin, JWTResponse, UserUpdate, UserLoginHistoryInDB
 from db.postgres import get_session
 from services import redis
-from services.user import get_user_service, UserService
+from services.user_service import get_user_service, UserService
 
 router = APIRouter()
 
