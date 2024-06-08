@@ -1,4 +1,5 @@
 import asyncio
+import subprocess
 from typing import Generator
 
 import aiohttp
@@ -36,6 +37,7 @@ async def db_session():
 @pytest_asyncio.fixture
 async def admin_authenticated_client(api_session, admin_user):
     login_data = {'login': admin_user.login, 'password': 'test_password'}
+    response = subprocess.check_output(['curl', '-X', test_settings.service_url])
     response = await api_session.post(f'{test_settings.service_url}/auth/login', json=login_data, ssl=False)
     assert response.status_code == 200
     cookies = response.cookies

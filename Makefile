@@ -11,7 +11,7 @@ ps:
 	$(DOCKER_COMPOSE) ps
 
 up:
-	$(DOCKER_COMPOSE) up -d
+	$(DOCKER_COMPOSE) up
 
 restart:
 	$(DOCKER_COMPOSE) restart
