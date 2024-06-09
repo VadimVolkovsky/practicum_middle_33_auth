@@ -3,6 +3,7 @@ from functools import lru_cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crud.base import CRUDBase
+from models.entity import Role
 
 
 class RoleService(CRUDBase):
@@ -51,5 +52,5 @@ class RoleService(CRUDBase):
 
 
 @lru_cache
-def get_role_service(model) -> RoleService:
-    return RoleService(model)
+def get_role_service() -> RoleService:
+    return RoleService(Role)
