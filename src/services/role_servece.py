@@ -1,11 +1,37 @@
 from functools import lru_cache
+from http import HTTPStatus
+
+from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from crud.base import CRUDBase
-from models.entity import Role
+from models.entity import Role, User, ROLES
 
 
 class RoleService(CRUDBase):
-    pass
+    async def get_by_name(self, name: str, session: AsyncSession) -> Role:
+        role = await self.get_by_attribute('name', name, session)
+
+        if not role:
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Role '{name}' not found")
+
+        return role
+
+    async def assign_role(self, role: Role, user: User, session: AsyncSession) -> User:
+        user.role = role
+        await session.commit()
+        await session.refresh(user)
+
+        return user
+
+    async def get_default_role(self, session: AsyncSession) -> Role:
+        default_role = ROLES[0]
+
+        if not (default_role := await self.get_by_name(default_role, session)):
+            default_role = await self.create(default_role, session)
+
+        return default_role
+
     # async def get(self, session: AsyncSession, role_id: UUID) -> Role | None:
     #     return (await session.scalars(select(Role).where(Role.id == role_id))).first()  # noqa
 
