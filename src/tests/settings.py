@@ -1,24 +1,28 @@
 from pydantic_settings import BaseSettings
 
+from core.config import AppSettings
 
-class TestSettings(BaseSettings):
-    test_database_url: str = 'postgresql+asyncpg://test:test@postgres:5432/test'
-    
-    # Настройки для запуска тестирования в контейнерах
-    # service_url: str = 'http://api:8000'
-    # redis_host: str = 'redis'
-    # redis_port: int = 6379
+# class TestSettings(BaseSettings):
+#     service_host: str
+#     service_port: int
+#
+#     service_url: str
+#
+#     postgres_host: str
+#     postgres_port: int
+#     postgres_db: str
+#     postgres_user: str
+#     postgres_password: str
+#
+#     redis_host: str
+#     redis_port: int
+#
+#     @property
+#     def test_database_url(self):
+#         return (f'postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@'
+#                 f'{self.postgres_host}:{self.postgres_port}/{self.postgres_db}')
+#
+#     class Config:
+#         env_file = '.env'
 
-    # Настройки для локального дебага тестов (без контейнера)
-    SERVISE_URL: str
-    POSTGRES_DB: str
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_HOST: str
-    POSTGRES_PORT: int
-    REDIS_HOST: str
-    REDIS_PORT: int
-    class Config:
-        env_file = '.env'
-
-test_settings = TestSettings()
+test_settings = AppSettings()

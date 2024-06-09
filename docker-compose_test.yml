@@ -26,7 +26,7 @@ services:
     container_name: middle_practicum_auth_postgres_test
     image: postgres:16.0
     ports:
-      - "5435:5432"
+      - "5432:5432"
     env_file:
       - .env
     networks:
@@ -47,21 +47,21 @@ services:
 
 
 
-#  tests:
-#    container_name: middle_practicum_auth_tests
-#    image: async_api_image
-#    env_file: .env
-#    entrypoint: >
-#      sh -c "pip install --no-cache-dir -r ../requirements.txt
-#      && python3 tests/functional/utils/wait_for_postgres.py
-#      && python3 tests/functional/utils/wait_for_redis.py
-#      && pytest tests/functional"
-#    depends_on:
-#      - postgres
-#      - redis
-#      - api
-#    networks:
-#      - default_test
+  tests:
+    container_name: middle_practicum_auth_tests
+    image: async_api_image
+    env_file: .env
+    entrypoint: >
+      sh -c "pip install --no-cache-dir -r ../requirements.txt
+      && python3 tests/functional/utils/wait_for_postgres.py
+      && python3 tests/functional/utils/wait_for_redis.py
+      && pytest tests/functional"
+    depends_on:
+      - postgres
+      - redis
+      - api
+    networks:
+      - default_test
 
 networks:
   default_test:

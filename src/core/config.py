@@ -15,6 +15,7 @@ class AppSettings(BaseSettings):
 
     service_host: str
     service_port: int
+    service_url: str
 
     postgres_host: str
     postgres_port: int
@@ -30,6 +31,11 @@ class AppSettings(BaseSettings):
     authjwt_denylist_token_checks: set = {"access", "refresh"}
     access_expires: int = 3600
     refresh_expires: int = 86400
+
+    @property
+    def database_url(self):
+        return (f'postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@'
+                f'{self.postgres_host}:{self.postgres_port}/{self.postgres_db}')
 
     class Config:
         env_file = '.env'
