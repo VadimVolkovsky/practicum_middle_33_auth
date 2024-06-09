@@ -52,8 +52,8 @@ def authjwt_exception_handler(request: Request, exc: AuthJWTException):
 if __name__ == '__main__':
     uvicorn.run(
         'main:app',
-        host='0.0.0.0',
-        port=8000,
+        host=app_settings.service_host,
+        port=app_settings.service_port,
         log_config=LOGGING,
         log_level=logging.DEBUG,
     )
