@@ -46,6 +46,7 @@ async def test_create_user(post_request, body, expected_answer):
 )
 @pytest.mark.asyncio
 async def test_login_user(post_request, body, expected_answer):
+    """Тест входа пользователя"""
     body_create_user = {
         "login": "user_login",
         "password": "123qwe",
@@ -63,3 +64,33 @@ async def test_login_user(post_request, body, expected_answer):
         assert 'refresh_token' in body
     if status == HTTPStatus.UNAUTHORIZED:
         assert body['detail'] == "Bad username or password"
+
+
+@pytest.mark.asyncio
+async def test_logout_user(post_request):
+    """Тест выхода пользователя"""
+    body_create_user = {
+        "login": "user_login",
+        "password": "123qwe",
+        "first_name": "ivan",
+        "last_name": "petrovich"
+    }
+
+    body_user_login = {
+             "login": "user_login",
+             "password": "123qwe"
+         }
+    url_create = 'http://127.0.0.1:8000/api/v1/auth/signup'
+    url_login = 'http://127.0.0.1:8000/api/v1/auth/login'
+    url_logout = 'http://127.0.0.1:8000/api/v1/auth/logout'
+    await post_request(url_create, data=body_create_user)
+    response = await post_request(url_login, data=body_user_login)
+
+    refresh_token = response.body['refresh_token']
+    headers = {'Authorization': f'Bearer {refresh_token}'}
+    response = await post_request(url_logout, headers=headers)
+    status = response.status
+    body = response.body
+
+    if status == HTTPStatus.OK:
+        assert body['detail'] == "Logged out successfully"

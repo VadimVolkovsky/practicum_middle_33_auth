@@ -25,8 +25,8 @@ async def get_request(api_session):
 
 @pytest_asyncio.fixture
 async def post_request(api_session):
-    async def inner(url, data):
-        async with api_session.post(url, json=data) as response:
+    async def inner(url, data=None, headers=None):
+        async with api_session.post(url, json=data, headers=headers) as response:
             return HTTPResponse(
                 body=await response.json(),
                 headers=response.headers,
