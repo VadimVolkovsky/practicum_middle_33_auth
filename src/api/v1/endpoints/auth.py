@@ -37,7 +37,7 @@ async def create_user(
     return await user_service.create_user(user_create, session)
 
 
-@router.post('/login', response_model=JWTResponse, status_code=HTTPStatus.CREATED)
+@router.post('/login', response_model=JWTResponse, status_code=HTTPStatus.OK)
 async def login(
         user: UserLogin,
         user_service: UserService = Depends(get_user_service),
@@ -139,6 +139,7 @@ async def get_user_login_history(
         user_service: UserService = Depends(get_user_service),
         session: AsyncSession = Depends(get_session)
 ):
+    """Эндпоинт для получения информации об истории входохов пользователя"""
     await authorize.jwt_required()
     user_login = await authorize.get_jwt_subject()
     user = await user_service.get_user_by_login(user_login, session)
