@@ -15,9 +15,9 @@ async def test_get_roles(admin_authenticated_client, db_session, roles, redis_cl
     # token = admin_authenticated_client.headers.get("Authorization")
     # headers = {'Authorization': f'Bearer {token}'}
 
-    response = await admin_authenticated_client.get(f'http://{test_settings.service_url}/api/v1/role')
+    response = await admin_authenticated_client.get(f'http://{test_settings.service_host}:{test_settings.service_port}/api/v1/role')
 
-    assert response.status_code == HTTPStatus.OK
+    assert response.status == HTTPStatus.OK
 
     response_data = response.json()
 

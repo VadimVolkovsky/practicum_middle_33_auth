@@ -1,5 +1,6 @@
 import asyncio
 
+import aiohttp
 import pytest_asyncio
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
@@ -11,7 +12,7 @@ from tests.settings import test_settings
 
 @pytest_asyncio.fixture(scope='session')
 async def db_session():
-    engine = create_async_engine(test_settings.database_url, echo=True, future=True)
+    engine = create_async_engine(test_settings.database_url, future=True)
     async_session = async_sessionmaker(engine, expire_on_commit=False)
 
     async with engine.begin() as conn:
@@ -34,14 +35,14 @@ def event_loop():
     loop.close()
 
 
-@pytest_asyncio.fixture(scope='session')
-async def api_session():
-    async with AsyncClient(app=app, base_url=test_settings.service_url) as client:
-        yield client
-
-
 # @pytest_asyncio.fixture(scope='session')
-# async def api_session(event_loop):
-#     session = aiohttp.ClientSession()
-#     yield session
-#     await session.close()
+# async def api_session():
+#     async with AsyncClient(app=app, base_url=test_settings.service_url) as client:
+#         yield client
+
+
+@pytest_asyncio.fixture(scope='session')
+async def api_session(event_loop):
+    session = aiohttp.ClientSession()
+    yield session
+    await session.close()

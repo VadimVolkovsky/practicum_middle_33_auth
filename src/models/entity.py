@@ -49,8 +49,8 @@ class User(Base):
     role_id: Mapped[Role] = mapped_column(ForeignKey('roles.id'), default=1)
     role = relationship("Role", lazy="selectin")
 
-    def __init__(self, login: str, password: str, first_name: str, last_name: str, role: int = None) -> None:
-        self.login = login
+    def __init__(self, username: str, password: str, first_name: str, last_name: str, role: int = None) -> None:
+        self.username = username
         self.password = generate_password_hash(password)
         self.first_name = first_name
         self.last_name = last_name
