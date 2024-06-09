@@ -1,7 +1,5 @@
 from functools import lru_cache
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from crud.base import CRUDBase
 from models.entity import Role
 

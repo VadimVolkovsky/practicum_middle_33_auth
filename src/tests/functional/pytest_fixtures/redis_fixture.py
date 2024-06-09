@@ -1,8 +1,6 @@
 import pytest_asyncio
 from redis.asyncio import Redis
 
-from main import app
-from services.redis import get_redis
 from tests.settings import test_settings
 
 

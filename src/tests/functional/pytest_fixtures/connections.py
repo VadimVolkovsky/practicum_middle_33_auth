@@ -1,6 +1,5 @@
 import asyncio
 
-import aiohttp
 import pytest_asyncio
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
@@ -46,4 +45,3 @@ async def api_session():
 #     session = aiohttp.ClientSession()
 #     yield session
 #     await session.close()
-

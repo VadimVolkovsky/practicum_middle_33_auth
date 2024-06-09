@@ -5,11 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import db
-import models
 from api.v1.serializers.role_serializer import RoleSerializer, RoleCreateSerializer
 from db.postgres import get_session
-from models.entity import Role, User
+from models.entity import User
 from services.role_servece import RoleService, get_role_service
 
 router = APIRouter()

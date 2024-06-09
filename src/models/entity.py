@@ -2,10 +2,9 @@ import contextlib
 import datetime
 import uuid
 
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from werkzeug.security import (check_password_hash
-, generate_password_hash)
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from db.postgres import Base, get_session
 
@@ -45,7 +44,8 @@ class User(Base):
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50))
-    created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow)  # TODO заменить datetime на актуальный аналог
+    # TODO заменить datetime на актуальный аналог
+    created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow)
     role_id: Mapped[Role] = mapped_column(ForeignKey('roles.id'), default=1)
     role = relationship("Role", lazy="selectin")
 

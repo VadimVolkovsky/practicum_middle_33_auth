@@ -1,7 +1,4 @@
-import backoff
 from redis import Redis
-from redis.exceptions import ConnectionError
-
 
 
 # @backoff.on_exception(backoff.expo, ConnectionError)

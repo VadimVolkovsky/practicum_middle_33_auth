@@ -126,7 +126,8 @@ async def change_user_data(
     user_login = raw_jwt['sub']
     await user_service.update_user_info(user_input_data, user_login, session)
 
-    # Деактивируем рефреш токен чобы пользователь заново залогинился (сейчас можно изменять только ключевые поля - логин или пароль)
+    """Деактивируем рефреш токен чобы пользователь заново залогинился
+    (сейчас можно изменять только ключевые поля - логин или пароль)"""
     jti = raw_jwt['jti']
     await user_service.redis.setex(jti, app_settings.refresh_expires, 'true')
 
@@ -143,5 +144,3 @@ async def get_user_login_history(
     user_login = await authorize.get_jwt_subject()
     user = await user_service.get_user_by_login(user_login, session)
     return await user_service.get_user_login_history(user, session)
-
-

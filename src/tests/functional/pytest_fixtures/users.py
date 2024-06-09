@@ -1,5 +1,4 @@
 import json
-import subprocess
 
 import pytest_asyncio
 
@@ -25,21 +24,6 @@ async def user_authenticated_client(api_session, user, redis_client):
     token = json.loads(response.content.decode())['refresh_token']
     api_session.headers['Authorization'] = f'Bearer {token}'
     yield api_session
-
-
-# @pytest_asyncio.fixture
-# async def authenticated_user(api_session):
-#     async def inner(user):
-#         login_data = {'login': user.login, 'password': 'test_password'}
-#         response = await api_session.post(f'http://{test_settings.service_url}/api/v1/auth/login', json=login_data)
-#         assert response.status_code == 201
-#         token = json.loads(response.content.decode())['refresh_token']
-#         api_session.headers['Authorization'] = f'Bearer {token}'
-#         yield api_session
-#
-#     return inner
-
-
 
 
 @pytest_asyncio.fixture

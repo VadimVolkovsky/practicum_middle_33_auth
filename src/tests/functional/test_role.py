@@ -35,7 +35,7 @@ async def test_create_exist_role(admin_authenticated_client, db_session):
 
 
 @pytest.mark.asyncio
-async def test_create_exist_role(admin_authenticated_client, db_session):
+async def test_create_role(admin_authenticated_client, db_session):
     assert len((await db_session.scalars(select(Role))).all()) == 3
 
     response = await admin_authenticated_client.post(f'http://{test_settings.service_url}/api/v1/role/create',
@@ -50,7 +50,7 @@ async def test_create_role_not_admin(user_authenticated_client, db_session):
     assert len((await db_session.scalars(select(Role))).all()) == 3
 
     response = await user_authenticated_client.post(f'http://{test_settings.service_url}/api/v1/role/create',
-                                                     json={'name': 'new_role'})
+                                                    json={'name': 'new_role'})
 
     assert response.status_code == HTTPStatus.FORBIDDEN
     assert len((await db_session.scalars(select(Role))).all()) == 3
