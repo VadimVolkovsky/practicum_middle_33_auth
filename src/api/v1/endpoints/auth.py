@@ -8,7 +8,7 @@ from core.config import AppSettings, app_settings
 from core.schemas.entity import UserInDB, UserCreate, UserLogin, JWTResponse, UserUpdate, UserLoginHistoryInDB
 from db.postgres import get_session
 from services import redis
-from services.user import get_user_service, UserService
+from services.user_service import get_user_service, UserService
 
 router = APIRouter()
 
@@ -126,7 +126,8 @@ async def change_user_data(
     username = raw_jwt['sub']
     await user_service.update_user_info(user_input_data, username, session)
 
-    # Деактивируем рефреш токен чобы пользователь заново залогинился (сейчас можно изменять только ключевые поля - логин или пароль)
+    """Деактивируем рефреш токен чобы пользователь заново залогинился
+    (сейчас можно изменять только ключевые поля - логин или пароль)"""
     jti = raw_jwt['jti']
     await user_service.redis.setex(jti, app_settings.refresh_expires, 'true')
 
@@ -144,5 +145,3 @@ async def get_user_login_history(
     username = await authorize.get_jwt_subject()
     user = await user_service.get_user_by_username(username, session)
     return await user_service.get_user_login_history(user, session)
-
-

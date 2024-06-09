@@ -1,5 +1,4 @@
 services:
-
   api:
     image: async_api_image
     build: .
@@ -10,35 +9,40 @@ services:
       - .env
     ports:
       - 8000:8000
-    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    command: uvicorn main:app --reload --host $SERVICE_HOST --port $SERVICE_PORT
     depends_on:
-      - postgres
-#      - redis
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
     networks:
       - default
     container_name: 'middle_practicum_api'
 
   postgres:
-    image: huecker.io/library/postgres:16.0
+    image: postgres:16.0
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - ./.env
+      - .env
+    healthcheck:
+        test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -p ${POSTGRES_PORT}" ]
+        interval: 5s
+        timeout: 5s
+        retries: 5
     networks:
       - default
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
     container_name: 'middle_practicum_auth_postgres'
 
   redis:
-    image: huecker.io/library/redis:7.2.5
+    image: redis:7.2.5
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       interval: 10s
     env_file:
-      - ./.env
+      - .env
     ports:
       - 6380:6379
     networks:

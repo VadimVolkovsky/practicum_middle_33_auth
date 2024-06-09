@@ -13,20 +13,29 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 class AppSettings(BaseSettings):
     project_name: str = Field(default='auth')
 
-    postgres_host: str = Field(default='localhost')
-    postgres_port: int = Field(default=5432)
-    postgres_db: str = Field(default='auth_database')
-    postgres_user: str = Field(default='app')
-    postgres_password: str = Field(default='123qwe')
+    service_host: str
+    service_port: int
+    service_url: str
 
-    redis_host: str = Field(default='redis')
-    redis_port: int = Field(default=6379)
+    postgres_host: str
+    postgres_port: int
+    postgres_db: str
+    postgres_user: str
+    postgres_password: str
+
+    redis_host: str
+    redis_port: int
 
     authjwt_secret_key: str = "secret"
     authjwt_denylist_enabled: bool = True
     authjwt_denylist_token_checks: set = {"access", "refresh"}
     access_expires: int = 3600
     refresh_expires: int = 86400
+
+    @property
+    def database_url(self):
+        return (f'postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@'
+                f'{self.postgres_host}:{self.postgres_port}/{self.postgres_db}')
 
     class Config:
         env_file = '.env'

@@ -28,3 +28,5 @@ shell:
 flake8:
 	$(EXEC_CORE) flake8
 
+test:
+	$(EXEC_CORE) pytest
