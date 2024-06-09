@@ -29,7 +29,4 @@ flake8:
 	$(EXEC_CORE) flake8
 
 test:
-	$(DOCKER_COMPOSE) -f docker-compose_test.yml up
-
-test_bash:
-	$(DOCKER_COMPOSE) -f docker-compose_test.yml exec api bash
+	$(EXEC_CORE) pytest
