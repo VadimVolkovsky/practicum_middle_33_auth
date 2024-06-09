@@ -2,28 +2,29 @@ import asyncio
 
 import aiohttp
 import pytest_asyncio
-# from httpx import AsyncClient
-#
-# from elasticsearch import AsyncElasticsearch
-# from main import app
-# from tests.functional.settings import test_settings
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+
+from db.postgres import Base, dsn
+from src.main import app
 
 
-# @pytest_asyncio.fixture(scope='session')
-# async def es_client():
-#     client = AsyncElasticsearch(
-#         hosts=test_settings.elastic_host,
-#         verify_certs=False,
-#         use_ssl=False
-#     )
-#     yield client
-#     await client.close()
-#
-#
-# @pytest_asyncio.fixture(scope='session')
-# async def async_client():
-#     async with AsyncClient(app=app, base_url=test_settings.service_url) as client:
-#         yield client
+@pytest_asyncio.fixture(scope='session')
+async def db_session():
+    engine = create_async_engine(dsn, future=True)
+    async_session = async_sessionmaker(engine, expire_on_commit=False)
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    async with async_session() as session:
+        yield session
+        await session.rollback()
+
+    await engine.dispose()
 
 
 @pytest_asyncio.fixture(scope='session')

@@ -13,8 +13,8 @@ class HTTPResponse:
 
 @pytest_asyncio.fixture
 async def get_request(api_session):
-    async def inner(url, params=None):
-        async with api_session.get(url, params=params) as response:
+    async def inner(url, params=None, headers=None):
+        async with api_session.get(url, params=params, headers=headers) as response:
             return HTTPResponse(
                 body=await response.json(),
                 headers=response.headers,
@@ -23,7 +23,7 @@ async def get_request(api_session):
     return inner
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(scope='session')
 async def post_request(api_session):
     async def inner(url, data=None, headers=None):
         async with api_session.post(url, json=data, headers=headers) as response:
