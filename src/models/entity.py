@@ -3,7 +3,7 @@ import datetime
 import uuid
 
 from sqlalchemy import Column, String, Integer, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from werkzeug.security import (check_password_hash
 , generate_password_hash)
 
@@ -46,7 +46,8 @@ class User(Base):
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50))
     created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow)  # TODO заменить datetime на актуальный аналог
-    role: Mapped[Role] = mapped_column(ForeignKey('roles.id'), default=1)
+    role_id: Mapped[Role] = mapped_column(ForeignKey('roles.id'), default=1)
+    role = relationship("Role", lazy="selectin")
 
     def __init__(self, login: str, password: str, first_name: str, last_name: str, role: int = None) -> None:
         self.login = login

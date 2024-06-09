@@ -1,8 +1,13 @@
-from pydantic import BaseModel, ConfigDict, UUID4
+from pydantic import BaseModel, ConfigDict
 
 
-class RoleSerializer(BaseModel):
+class RoleCreateSerializer(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: UUID4
     name: str
+
+
+class RoleSerializer(RoleCreateSerializer):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int

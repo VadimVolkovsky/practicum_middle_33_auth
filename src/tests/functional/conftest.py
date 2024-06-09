@@ -3,5 +3,5 @@ pytest_plugins = (
     'tests.functional.pytest_fixtures.connections',
     'tests.functional.pytest_fixtures.roles',
     'tests.functional.pytest_fixtures.users',
-    'tests.functional.pytest_fixtures.redis',
+    'tests.functional.pytest_fixtures.redis_fixture',
 )

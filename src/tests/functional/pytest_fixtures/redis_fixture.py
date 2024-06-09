@@ -1,6 +1,5 @@
-import fakeredis
 import pytest_asyncio
-from redis import Redis
+from redis.asyncio import Redis
 
 from main import app
 from services.redis import get_redis

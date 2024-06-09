@@ -1,5 +1,3 @@
-from pydantic_settings import BaseSettings
-
 from core.config import AppSettings
 
 # class TestSettings(BaseSettings):
