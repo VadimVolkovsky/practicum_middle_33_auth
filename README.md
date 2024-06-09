@@ -8,13 +8,17 @@
 
 ```
 touch ./.env & echo "## Run in docker containers:
+SERVICE_URL=$SERVICE_HOST:$SERVICE_PORT
+SERVICE_HOST=0.0.0.0
+SERVICE_PORT=8000
+
 POSTGRES_DB=auth_database
 POSTGRES_USER=app
 POSTGRES_PASSWORD=123qwe
-POSTGRES_HOST=middle_practicum_auth_postgres
+POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
-REDIS_HOST=middle_practicum_auth_redis
-REDIS_PORT=6379
+REDIS_HOST=redis
+REDIS_PORT=6380
 
 ## Local run for debug:
 #POSTGRES_DB=auth_database
