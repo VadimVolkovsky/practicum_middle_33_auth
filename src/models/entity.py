@@ -41,15 +41,15 @@ class User(Base):
     __tablename__ = 'users'
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
-    login: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    username: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50))
     created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow)  # TODO заменить datetime на актуальный аналог
     role: Mapped[Role] = mapped_column(ForeignKey('roles.id'), default=1)
 
-    def __init__(self, login: str, password: str, first_name: str, last_name: str) -> None:
-        self.login = login
+    def __init__(self, username: str, password: str, first_name: str, last_name: str) -> None:
+        self.username = username
         self.password = self.password = generate_password_hash(password)
         self.first_name = first_name
         self.last_name = last_name
@@ -58,7 +58,7 @@ class User(Base):
         return check_password_hash(self.password, password)
 
     def __repr__(self) -> str:
-        return f'<User {self.login}>'
+        return f'<User {self.username}>'
 
 
 class UserLoginHistory(Base):

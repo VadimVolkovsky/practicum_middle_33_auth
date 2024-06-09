@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 class UserCreate(BaseModel):
     """Cхема UserCreate описывает то, что мы ожидаем получить при создании записи в базе данных. """
-    login: str
+    username: str
     password: str
     first_name: str
     last_name: str
@@ -14,13 +14,13 @@ class UserCreate(BaseModel):
 
 class UserLogin(BaseModel):
     """Модель для работы с аутентификацией пользователя"""
-    login: str
+    username: str
     password: str
 
 
 class UserUpdate(BaseModel):
     """Модель обновления данных пользователя"""
-    login: str | None = None
+    username: str | None = None
     password: str | None = None
 
 

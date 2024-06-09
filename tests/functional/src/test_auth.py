@@ -6,13 +6,13 @@ from http import HTTPStatus
     'body, expected_answer',
     [
         ({
-             "login": "default_username_2",
+             "username": "default_username_2",
              "password": "test_password",
              "first_name": "ivan",
              "last_name": "petrovich"
          }, {'status': HTTPStatus.CREATED}),
         ({
-             "login": "default_username_2",
+             "username": "default_username_2",
              "first_name": "ivan",
              "last_name": "petrovich"
          }, {'status': HTTPStatus.UNPROCESSABLE_ENTITY}),
@@ -29,17 +29,19 @@ async def test_create_user(db_session, roles, post_request, body, expected_answe
         assert 'id' in response_body
         assert body['first_name'] == response_body['first_name']
         assert body['last_name'] == response_body['last_name']
+    if status == HTTPStatus.UNPROCESSABLE_ENTITY:
+        pass
 
 
 @pytest.mark.parametrize(
     'body, expected_answer',
     [
         ({
-             "login": "default_username",
+             "username": "default_username",
              "password": "test_password"
          }, {'status': HTTPStatus.OK}),
         ({
-             "login": "fake_login",
+             "username": "fake_login",
              "password": "fake_pass"
          }, {'status': HTTPStatus.UNAUTHORIZED}),
     ]
@@ -88,7 +90,7 @@ async def test_change_user_data(authenticated_user, post_request):
     """Тест обновления данных пользователя"""
     url_user_update = 'http://127.0.0.1:8000/api/v1/auth/user_update'
     headers = {'Authorization': f'Bearer {authenticated_user['refresh_token']}'}
-    body = {"login": "new_username"}
+    body = {"username": "new_username"}
 
     response = await post_request(url_user_update, data=body, headers=headers)
     status = response.status

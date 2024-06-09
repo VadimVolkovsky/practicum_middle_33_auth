@@ -48,11 +48,11 @@ async def login(
     Эндпоинт авторизации пользователя по логину и паролю.
     В случае усешной авторизации создаются access и refresh токены
     """
-    if not await user_service.check_user_credentials(user.login, user.password, session):
+    if not await user_service.check_user_credentials(user.username, user.password, session):
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Bad username or password")
-    access_token = await authorize.create_access_token(subject=user.login)
-    refresh_token = await authorize.create_refresh_token(subject=user.login)
-    await user_service.add_user_login_history(user.login, session)
+    access_token = await authorize.create_access_token(subject=user.username)
+    refresh_token = await authorize.create_refresh_token(subject=user.username)
+    await user_service.add_user_login_history(user.username, session)
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)
 
 
@@ -123,8 +123,8 @@ async def change_user_data(
 
     # Обновляем данные пользователя в БД
     raw_jwt = await authorize.get_raw_jwt()
-    user_login = raw_jwt['sub']
-    await user_service.update_user_info(user_input_data, user_login, session)
+    username = raw_jwt['sub']
+    await user_service.update_user_info(user_input_data, username, session)
 
     # Деактивируем рефреш токен чобы пользователь заново залогинился (сейчас можно изменять только ключевые поля - логин или пароль)
     jti = raw_jwt['jti']
@@ -141,8 +141,8 @@ async def get_user_login_history(
 ):
     """Эндпоинт для получения информации об истории входохов пользователя"""
     await authorize.jwt_required()
-    user_login = await authorize.get_jwt_subject()
-    user = await user_service.get_user_by_login(user_login, session)
+    username = await authorize.get_jwt_subject()
+    user = await user_service.get_user_by_username(username, session)
     return await user_service.get_user_login_history(user, session)
 
 
