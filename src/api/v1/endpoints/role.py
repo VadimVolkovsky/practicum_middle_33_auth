@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import db
 import models
+from api.v1.serializers.role_serializer import RoleSerializer
 from db.postgres import get_session
 from models.entity import Role, User
 from services.role_servece import RoleService, get_role_service
@@ -14,7 +15,7 @@ from services.role_servece import RoleService, get_role_service
 router = APIRouter()
 
 
-@router.get('/', response_model=list[Role])
+@router.get('', response_model=list[RoleSerializer])
 async def get_roles(
         authorize: AuthJWT = Depends(),
         role_service: RoleService = Depends(get_role_service),
@@ -30,8 +31,8 @@ async def get_roles(
     return await role_service.get_list(session)
 
 
-@router.post('/create', response_model=Role, status_code=HTTPStatus.CREATED,)
-async def create_role(role_data: Role, authorize: AuthJWT = Depends(),
+@router.post('/create')
+async def create_role(role_data: RoleSerializer, authorize: AuthJWT = Depends(),
                       role_service: RoleService = Depends(get_role_service),
                       session: AsyncSession = Depends(get_session)):
 
