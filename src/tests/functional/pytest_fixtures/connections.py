@@ -2,9 +2,11 @@ import asyncio
 
 import aiohttp
 import pytest_asyncio
+from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from db.postgres import Base
+from main import app
 from tests.settings import test_settings
 
 
@@ -26,12 +28,6 @@ async def db_session():
     await engine.dispose()
 
 
-# @pytest_asyncio.fixture(scope='session')
-# async def async_client():
-#     async with AsyncClient(app=app, base_url=test_settings.service_url) as client:
-#         yield client
-
-
 @pytest_asyncio.fixture(scope="session")
 def event_loop():
     loop = asyncio.get_event_loop_policy().new_event_loop()
@@ -40,7 +36,14 @@ def event_loop():
 
 
 @pytest_asyncio.fixture(scope='session')
-async def api_session(event_loop):
-    session = aiohttp.ClientSession()
-    yield session
-    await session.close()
+async def api_session():
+    async with AsyncClient(app=app, base_url=test_settings.service_url) as client:
+        yield client
+
+
+# @pytest_asyncio.fixture(scope='session')
+# async def api_session(event_loop):
+#     session = aiohttp.ClientSession()
+#     yield session
+#     await session.close()
+

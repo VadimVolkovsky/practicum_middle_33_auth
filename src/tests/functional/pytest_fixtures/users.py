@@ -1,3 +1,4 @@
+import json
 import subprocess
 
 import pytest_asyncio
@@ -7,14 +8,12 @@ from tests.settings import test_settings
 
 
 @pytest_asyncio.fixture
-async def admin_authenticated_client(api_session, admin_user, post_request):
+async def admin_authenticated_client(api_session, admin_user):
     login_data = {'login': admin_user.login, 'password': 'test_password'}
-    response = subprocess.run(['curl', '-X', 'GET', 'http://'+test_settings.service_url+'/api/openapi'], capture_output=True, text=True)
     response = await api_session.post(f'http://{test_settings.service_url}/api/v1/auth/login', json=login_data)
-    # response = await post_request(f'{test_settings.service_url}/api/v1/auth/login', login_data)
-    assert response.status_code == 200
-    cookies = response.cookies
-    api_session.cookies = cookies
+    assert response.status_code == 201
+    token = json.loads(response.content.decode())['refresh_token']
+    api_session.headers['Authorization'] = f'Bearer {token}'
     yield api_session
 
 
