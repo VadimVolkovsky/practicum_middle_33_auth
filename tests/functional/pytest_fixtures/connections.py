@@ -35,14 +35,14 @@ def event_loop():
     loop.close()
 
 
-# @pytest_asyncio.fixture(scope='session')
-# async def api_session():
-#     async with AsyncClient(app=app, base_url=test_settings.service_url) as client:
-#         yield client
-
-
 @pytest_asyncio.fixture(scope='session')
-async def api_session(event_loop):
-    session = aiohttp.ClientSession()
-    yield session
-    await session.close()
+async def api_session():
+    async with AsyncClient(app=app, base_url=test_settings.service_url) as client:
+        yield client
+
+
+# @pytest_asyncio.fixture(scope='session')
+# async def api_session(event_loop):
+#     session = aiohttp.ClientSession()
+#     yield session
+#     await session.close()

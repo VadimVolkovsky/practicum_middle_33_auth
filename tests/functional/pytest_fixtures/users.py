@@ -9,21 +9,32 @@ from http import HTTPStatus
 
 @pytest_asyncio.fixture
 async def admin_authenticated_client(api_session, admin_user, redis_client):
+    """Сессия авторизованного админа"""
     login_data = {'username': admin_user.username, 'password': 'test_password'}
     response = await api_session.post(f'http://{test_settings.service_host}:{test_settings.service_port}/api/v1/auth/login', json=login_data)
-    assert response.status == HTTPStatus.OK
-    token = json.loads(response.content.decode())['refresh_token']
-    api_session.headers['Authorization'] = f'Bearer {token}'
+    assert response.status_code == HTTPStatus.OK
+    access_token = json.loads(response.content.decode())['access_token']
+    # refresh_token = json.loads(response.content.decode())['refresh_token']
+    # api_session.cookies['access_token'] = access_token
+    # api_session.cookies['refresh_token'] = refresh_token
+    api_session.headers['Authorization'] = f'Bearer {access_token}'
     yield api_session
 
 
 @pytest_asyncio.fixture
-async def user_authenticated_client(api_session, user, redis_client):
-    login_data = {'username': user.username, 'password': 'test_password'}
+async def user_authenticated_client(api_session, default_user, redis_client):
+    """Сессия авторизованного пользователя"""
+    login_data = {'username': default_user.username, 'password': 'test_password'}
     response = await api_session.post(f'http://{test_settings.service_host}:{test_settings.service_port}/api/v1/auth/login', json=login_data)
-    assert response.status == HTTPStatus.OK
-    token = json.loads(response.content.decode())['refresh_token']
-    api_session.headers['Authorization'] = f'Bearer {token}'
+    assert response.status_code == HTTPStatus.OK
+    access_token = json.loads(response.content.decode())['access_token']
+    api_session.headers['Authorization'] = f'Bearer {access_token}'
+    yield api_session
+
+
+@pytest_asyncio.fixture
+async def user_anonymous_client(api_session, default_user, redis_client):
+    """Сессия анонимного пользователя"""
     yield api_session
 
 

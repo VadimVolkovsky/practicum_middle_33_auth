@@ -26,6 +26,7 @@ class AppSettings(BaseSettings):
     redis_host: str
     redis_port: int
 
+
     authjwt_secret_key: str = "secret"
     authjwt_denylist_enabled: bool = True
     authjwt_denylist_token_checks: set = {"access", "refresh"}
