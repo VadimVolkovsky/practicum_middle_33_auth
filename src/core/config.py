@@ -27,7 +27,6 @@ class AppSettings(BaseSettings):
     redis_host: str
     redis_port: int
 
-
     authjwt_secret_key: str = "secret"
     authjwt_denylist_enabled: bool = True
     authjwt_denylist_token_checks: set = {"access", "refresh"}
@@ -35,6 +34,7 @@ class AppSettings(BaseSettings):
     refresh_expires: int = 86400
 
     debug: bool = Field(default='False')
+
     @property
     def database_url(self):
         return (f'postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@'
