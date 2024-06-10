@@ -8,9 +8,8 @@ services:
     env_file:
       - .env
     ports:
-      - 0:8000
-#    command: uvicorn main:app --reload --host $SERVICE_HOST --port $SERVICE_PORT
-    command: gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind $SERVICE_HOST:$SERVICE_PORT
+      - 8000:8000
+    command: uvicorn main:app --reload --host $SERVICE_HOST --port $SERVICE_PORT
     depends_on:
       redis:
         condition: service_healthy
@@ -23,7 +22,7 @@ services:
   postgres:
     image: postgres:16.0
     ports:
-      - "0:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
@@ -45,21 +44,14 @@ services:
     env_file:
       - .env
     ports:
-      - 0:6379
+      - 6380:6379
     networks:
       - default
     container_name: 'middle_practicum_auth_redis'
 
   nginx:
-    image: nginx:1.19.2
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/configs:/etc/nginx/conf.d:ro
-    depends_on:
-      - api
-    ports:
-      - "80:80"
-    container_name: 'middle_practicum_nginx'
+    entrypoint: [ "echo", "Service nginx disabled in dev mode" ]
+
 
 volumes:
   postgres_data:
