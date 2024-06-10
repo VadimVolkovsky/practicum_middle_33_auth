@@ -6,7 +6,7 @@ from core.config import app_settings
 Base = declarative_base()
 dsn = (f'postgresql+asyncpg://{app_settings.postgres_user}:{app_settings.postgres_password}@'
        f'{app_settings.postgres_host}:{app_settings.postgres_port}/{app_settings.postgres_db}')
-engine = create_async_engine(dsn, echo=True, future=True)
+engine = create_async_engine(dsn, echo=app_settings.echo, future=True)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
