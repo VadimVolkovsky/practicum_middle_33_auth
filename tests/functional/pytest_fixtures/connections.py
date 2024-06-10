@@ -10,7 +10,8 @@ from main import app
 from tests.settings import test_settings
 
 
-@pytest_asyncio.fixture(scope='session')
+# @pytest_asyncio.fixture(scope='session')
+@pytest_asyncio.fixture
 async def db_session():
     engine = create_async_engine(test_settings.database_url, future=True)
     async_session = async_sessionmaker(engine, expire_on_commit=False)
@@ -35,7 +36,7 @@ def event_loop():
     loop.close()
 
 
-@pytest_asyncio.fixture(scope='session')
+@pytest_asyncio.fixture
 async def api_session():
     async with AsyncClient(app=app, base_url=test_settings.service_url) as client:
         yield client

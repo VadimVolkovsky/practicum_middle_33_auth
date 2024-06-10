@@ -65,7 +65,7 @@ async def user(db_session, roles):
     db_session.add(admin_user)
 
 
-@pytest_asyncio.fixture(scope='session')
+@pytest_asyncio.fixture
 async def default_user(db_session, roles):
     """Возвращает объект пользователя из БД"""
     default_user = User(username='default_username',
