@@ -28,6 +28,8 @@ async def user_authenticated_client(api_session, default_user, redis_client):
     response = await api_session.post(f'http://{test_settings.service_host}:{test_settings.service_port}/api/v1/auth/login', json=login_data)
     assert response.status_code == HTTPStatus.OK
     access_token = json.loads(response.content.decode())['access_token']
+    refresh_token = json.loads(response.content.decode())['refresh_token']
+    api_session.cookies['refresh_token'] = refresh_token  # сохраняем рефреш токен в куки для эндпоинта /refresh
     api_session.headers['Authorization'] = f'Bearer {access_token}'
     yield api_session
 

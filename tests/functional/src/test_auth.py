@@ -77,6 +77,8 @@ async def test_logout_user(user_authenticated_client):
 async def test_token_refresh(user_authenticated_client):
     """Тест обновления токена access"""
     url = 'http://127.0.0.1:8000/api/v1/auth/refresh'
+    refresh_token = user_authenticated_client.cookies['refresh_token']
+    user_authenticated_client.headers['Authorization'] = f'Bearer {refresh_token}'
     response = await user_authenticated_client.post(url)
     status = response.status_code
     response_body = response.json()
@@ -85,14 +87,24 @@ async def test_token_refresh(user_authenticated_client):
     assert 'access_token' in response_body
 
 
+@pytest.mark.asyncio
+async def test_get_user_login_history(user_authenticated_client):
+    """Тесты получения информации об истории входов пользователя"""
+    url = 'http://127.0.0.1:8000/api/v1/auth/user_login_history'
+    response = await user_authenticated_client.get(url)
+    status = response.status_code
+    response_body = response.json()
 
-# TODO пофиксить токен на акссес
+    assert status == HTTPStatus.OK
+    assert 'login_date' in response_body
+
+
+# TODO после этого теста меняются данные юзера в БД и последующие тесты не проходят с прошлым username
 @pytest.mark.asyncio
 async def test_change_user_data(user_authenticated_client):
     """Тест обновления данных пользователя"""
     url = 'http://127.0.0.1:8000/api/v1/auth/user_update'
     body = {"username": "new_username"}
-
     response = await user_authenticated_client.post(url, json=body)
     status = response.status_code
     response_body = response.json()
@@ -100,18 +112,5 @@ async def test_change_user_data(user_authenticated_client):
     assert status == HTTPStatus.OK
     assert response_body['detail'] == "Data were updated successfully"
 
-
-# TODO пофиксить токен на акссес
-@pytest.mark.asyncio
-async def test_get_user_login_history(user_authenticated_client):
-    """Тесты получения информации об истории входов пользователя"""
-    url = 'http://127.0.0.1:8000/api/v1/auth/user_login_history'
-
-    response = await user_authenticated_client.get(url)
-    status = response.status_code
-    response_body = response.json()
-
-    assert status == HTTPStatus.OK
-    assert 'login_date' in response_body
 
 
