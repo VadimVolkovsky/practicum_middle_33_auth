@@ -51,7 +51,7 @@ async def create_role(role_data: RoleCreateSerializer, authorize: AuthJWT = Depe
     return await role_service.create(role_data, session)
 
 
-@router.post('/assign_user',response_model=AssignRoleSerializer, status_code=HTTPStatus.OK)
+@router.post('/assign_user', response_model=AssignRoleSerializer, status_code=HTTPStatus.OK)
 async def add_role_user(username: str,
                         role_name: str,
                         role_service: RoleService = Depends(get_role_service),
