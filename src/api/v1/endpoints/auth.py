@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from async_fastapi_jwt_auth import AuthJWT
+from async_fastapi_jwt_auth.auth_jwt import AuthJWTBearer
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,6 +12,7 @@ from services import redis
 from services.user_service import get_user_service, UserService
 
 router = APIRouter()
+auth_dep = AuthJWTBearer()
 
 
 @AuthJWT.load_config
@@ -41,7 +43,7 @@ async def create_user(
 async def login(
         user: UserLogin,
         user_service: UserService = Depends(get_user_service),
-        authorize: AuthJWT = Depends(),
+        authorize: AuthJWT = Depends(auth_dep),
         session: AsyncSession = Depends(get_session)
 ):
     """
@@ -56,13 +58,13 @@ async def login(
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)
 
 
-@router.post('/logout', status_code=HTTPStatus.OK)
+@router.delete('/logout', status_code=HTTPStatus.OK)
 async def logout(  # TODO нужно ли обнулять все токены юзера со всех устройств ?
         user_service: UserService = Depends(get_user_service),
-        authorize: AuthJWT = Depends(),
+        authorize: AuthJWT = Depends(auth_dep),
 ):
     """Эндпоинт разлогинивания пользователя путем добавления его refresh токена в блэк-лист Redis"""
-    await authorize.jwt_refresh_token_required()
+    await authorize.jwt_required()
     raw_jwt = await authorize.get_raw_jwt()
     jti = raw_jwt['jti']
     await user_service.redis.setex(jti, app_settings.refresh_expires, 'true')
@@ -70,7 +72,7 @@ async def logout(  # TODO нужно ли обнулять все токены �
 
 
 @router.post('/refresh')
-async def refresh(authorize: AuthJWT = Depends()):
+async def refresh(authorize: AuthJWT = Depends(auth_dep)):
     """
     Эндпоинт получения нового access токена по refresh токену.
     В случае если refresh токен в блэк-листе Redis, новый access токен не выдается
@@ -119,18 +121,14 @@ async def change_user_data(
         session: AsyncSession = Depends(get_session)
 ):
     """Эндпоинт для обновления данных пользователя"""
-    await authorize.jwt_refresh_token_required()
+    await authorize.jwt_required()
 
     # Обновляем данные пользователя в БД
     raw_jwt = await authorize.get_raw_jwt()
     username = raw_jwt['sub']
     await user_service.update_user_info(user_input_data, username, session)
-
-    """Деактивируем рефреш токен чобы пользователь заново залогинился
-    (сейчас можно изменять только ключевые поля - логин или пароль)"""
     jti = raw_jwt['jti']
     await user_service.redis.setex(jti, app_settings.refresh_expires, 'true')
-
     return {"detail": "Data were updated successfully"}
 
 
