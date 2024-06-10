@@ -24,21 +24,21 @@ class UserService:
         """Метод для регистрации нового пользователя"""
         user_dto = jsonable_encoder(user_create)
         user = User(**user_dto)
-        user_obj = await user_crud.get_by_attribute('username', user.username, session)
+        user_obj = await user_crud.get_by_attribute('email', user.email, session)
         if user_obj:
             raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-                                detail=f"Username '{user.username}' is already in use")
+                                detail=f"email '{user.email}' is already in use")
         return await user_crud.create_user(user, session)
 
-    async def get_user_by_username(self, username: str, session: AsyncSession) -> User:
-        user = await user_crud.get_by_attribute('username', username, session)
+    async def get_user_by_email(self, email: str, session: AsyncSession) -> User:
+        user = await user_crud.get_by_attribute('email', email, session)
         if not user:
-            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"User '{username}' not found")
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"User with email '{email}' not found")
         return user
 
-    async def check_user_credentials(self, username, password, session) -> bool:
+    async def check_user_credentials(self, email, password, session) -> bool:
         """Метод для проверки логина и пароля пользователя с данными в БД"""
-        user_obj = await user_crud.get_by_attribute('username', username, session)
+        user_obj = await user_crud.get_by_attribute('email', email, session)
         if user_obj:
             if check_password_hash(user_obj.password, password):
                 return True
@@ -47,14 +47,14 @@ class UserService:
     async def update_user_info(
             self,
             user_input_data: UserUpdate,
-            username: str,
+            email: str,
             session: AsyncSession
     ) -> User:
         """Метод для обновления данных пользователя"""
-        db_user = await user_crud.get_by_attribute('username', username, session)
+        db_user = await user_crud.get_by_attribute('email', email, session)
         if not db_user:
             raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-                                detail=f"User with username '{username}' does not exist")
+                                detail=f"User with email '{email}' does not exist")
         if user_input_data.password:
             user_input_data.password = generate_password_hash(user_input_data.password)
         db_user_updated = await user_crud.update(db_user, user_input_data, session)
@@ -62,11 +62,11 @@ class UserService:
 
     async def add_user_login_history(
             self,
-            username: str,
+            email: str,
             session: AsyncSession
     ) -> None:
         """Метод для сохранения истории входов пользователя"""
-        user_data = await user_crud.get_by_attribute('username', username, session)
+        user_data = await user_crud.get_by_attribute('email', email, session)
         obj_in = UserLoginHistory(user=user_data.id)
         await user_login_history_crud.create(obj_in, session)
 

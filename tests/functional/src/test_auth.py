@@ -6,13 +6,13 @@ from http import HTTPStatus
     'body, expected_answer',
     [
         ({
-             "username": "default_username_2",
+             "email": "default@mail.ru",
              "password": "test_password",
              "first_name": "ivan",
              "last_name": "petrovich"
          }, {'status': HTTPStatus.CREATED}),
         ({
-             "username": "default_username_2",
+             "email": "default@mail.ru",
              "first_name": "ivan",
              "last_name": "petrovich"
          }, {'status': HTTPStatus.UNPROCESSABLE_ENTITY}),
@@ -37,11 +37,11 @@ async def test_create_user(db_session, roles, user_anonymous_client, body, expec
     'body, expected_answer',
     [
         ({
-             "username": "default_username",
+             "email": "default@mail.ru",
              "password": "test_password"
          }, {'status': HTTPStatus.OK}),
         ({
-             "username": "fake_login",
+             "email": "fake@mail.ru",
              "password": "fake_pass"
          }, {'status': HTTPStatus.UNAUTHORIZED}),
     ]
@@ -57,7 +57,7 @@ async def test_login_user(default_user, user_anonymous_client, body, expected_an
         assert 'access_token' in response_body
         assert 'refresh_token' in response_body
     if status == HTTPStatus.UNAUTHORIZED:
-        assert response_body['detail'] == "Bad username or password"
+        assert response_body['detail'] == "Bad email or password"
 
 
 # TODO пофиксить токен на акссес
@@ -99,12 +99,12 @@ async def test_get_user_login_history(user_authenticated_client):
     assert 'login_date' in response_body
 
 
-# TODO после этого теста меняются данные юзера в БД и последующие тесты не проходят с прошлым username
+# TODO после этого теста меняются данные юзера в БД и последующие тесты не проходят с прошлым email
 @pytest.mark.asyncio
 async def test_change_user_data(user_authenticated_client):
     """Тест обновления данных пользователя"""
     url = 'http://127.0.0.1:8000/api/v1/auth/user_update'
-    body = {"username": "new_username"}
+    body = {"email": "new_email@mail.ru"}
     response = await user_authenticated_client.post(url, json=body)
     status = response.status_code
     response_body = response.json()
