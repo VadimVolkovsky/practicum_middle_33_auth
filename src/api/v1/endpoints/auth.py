@@ -50,11 +50,11 @@ async def login(
     Эндпоинт авторизации пользователя по логину и паролю.
     В случае усешной авторизации создаются access и refresh токены
     """
-    if not await user_service.check_user_credentials(user.username, user.password, session):
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Bad username or password")
-    access_token = await authorize.create_access_token(subject=user.username)
-    refresh_token = await authorize.create_refresh_token(subject=user.username)
-    await user_service.add_user_login_history(user.username, session)
+    if not await user_service.check_user_credentials(user.email, user.password, session):
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Bad email or password")
+    access_token = await authorize.create_access_token(subject=user.email)
+    refresh_token = await authorize.create_refresh_token(subject=user.email)
+    await user_service.add_user_login_history(user.email, session)
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)
 
 
@@ -125,8 +125,8 @@ async def change_user_data(
 
     # Обновляем данные пользователя в БД
     raw_jwt = await authorize.get_raw_jwt()
-    username = raw_jwt['sub']
-    await user_service.update_user_info(user_input_data, username, session)
+    email = raw_jwt['sub']
+    await user_service.update_user_info(user_input_data, email, session)
     jti = raw_jwt['jti']
     await user_service.redis.setex(jti, app_settings.refresh_expires, 'true')
     return {"detail": "Data were updated successfully"}
@@ -140,6 +140,6 @@ async def get_user_login_history(
 ):
     """Эндпоинт для получения информации об истории входохов пользователя"""
     await authorize.jwt_required()
-    username = await authorize.get_jwt_subject()
-    user = await user_service.get_user_by_username(username, session)
+    email = await authorize.get_jwt_subject()
+    user = await user_service.get_user_by_email(email, session)
     return await user_service.get_user_login_history(user, session)

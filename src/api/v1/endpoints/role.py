@@ -22,7 +22,7 @@ async def get_roles(
 
     # await authorize.jwt_refresh_token_required()
     user_username = await authorize.get_jwt_subject()
-    db_user = await session.execute(select(User).where(User.username == user_username))
+    db_user = await session.execute(select(User).where(User.email == user_username))
     user = db_user.scalars().first()
 
     if user.role.name != 'admin':
@@ -39,7 +39,7 @@ async def create_role(role_data: RoleCreateSerializer, authorize: AuthJWT = Depe
     # await authorize.jwt_refresh_token_required()
     user_username = await authorize.get_jwt_subject()
 
-    db_user = await session.execute(select(User).where(User.username == user_username))
+    db_user = await session.execute(select(User).where(User.email == user_username))
     user = db_user.scalars().first()
 
     if user.role.name != 'admin':
@@ -71,7 +71,7 @@ async def add_role_user(username: str,
     user = await role_service.assign_role(role, user, session)
 
     return AssignRoleSerializer(
-        username=user.username,
+        username=user.email,
         role=RoleSerializer(id=role.id, name=role.name)
     )
 
@@ -95,6 +95,6 @@ async def revoke_role(
     user = await role_service.assign_role(role, user, session)
 
     return AssignRoleSerializer(
-        username=user.username,
+        username=user.email,
         role=RoleSerializer(id=role.id, name=role.name)
     )
