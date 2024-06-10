@@ -1,7 +1,8 @@
+import backoff
 from sqlalchemy_utils import database_exists
 
 
-# @backoff.on_exception(backoff.expo, ConnectionError)
+@backoff.on_exception(backoff.expo, ConnectionError)
 def is_db_exist(pg_url: str):
     return database_exists(pg_url)
 
