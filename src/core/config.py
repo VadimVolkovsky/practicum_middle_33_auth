@@ -34,6 +34,7 @@ class AppSettings(BaseSettings):
     access_expires: int = 3600
     refresh_expires: int = 86400
 
+    debug: bool = Field(default='False')
     @property
     def database_url(self):
         return (f'postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@'
