@@ -35,7 +35,7 @@ class UserInDB(BaseModel):
 
 
 class UserLoginHistory(BaseModel):
-    user: UUID
+    user_id: UUID
 
 
 class UserLoginHistoryInDB(BaseModel):

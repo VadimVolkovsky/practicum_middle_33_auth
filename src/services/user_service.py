@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
-from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.security import generate_password_hash
 
 from core.schemas.entity import UserCreate, UserUpdate, UserLoginHistory, UserLoginHistoryInDB, UserInDB
 from crud.user import user_crud
@@ -40,7 +40,7 @@ class UserService:
         """Метод для проверки логина и пароля пользователя с данными в БД"""
         user_obj = await user_crud.get_by_attribute('username', username, session)
         if user_obj:
-            if check_password_hash(user_obj.password, password):
+            if user_obj.check_password(password):
                 return True
         return False
 
@@ -67,7 +67,7 @@ class UserService:
     ) -> None:
         """Метод для сохранения истории входов пользователя"""
         user_data = await user_crud.get_by_attribute('username', username, session)
-        obj_in = UserLoginHistory(user=user_data.id)
+        obj_in = UserLoginHistory(user_id=user_data.id)
         await user_login_history_crud.create(obj_in, session)
 
     async def get_user_login_history(self, user: User, session: AsyncSession) -> UserLoginHistoryInDB:
