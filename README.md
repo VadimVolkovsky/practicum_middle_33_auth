@@ -46,8 +46,19 @@ make build
 make up
 ```
 
+#### Создание миграций
 
-#### После запуска всех контейнеров можно создать супер пользователя:
+```shell script
+make makemigrations
+```
+
+#### Применение миграций
+
+```shell script
+make migrate
+```
+
+#### Создание супер пользователя:
 ```shell script
 make superuser
 ```
@@ -57,4 +68,3 @@ make superuser
 ```shell script
 make down
 ```
-
