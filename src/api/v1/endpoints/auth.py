@@ -53,21 +53,29 @@ async def login(
     if not await user_service.check_user_credentials(user.email, user.password, session):
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Bad email or password")
     access_token = await authorize.create_access_token(subject=user.email)
-    refresh_token = await authorize.create_refresh_token(subject=user.email)
+    raw_jwt = await authorize.get_raw_jwt(encoded_token=access_token)
+    access_token_jti = raw_jwt['jti']
+
+    refresh_token = await authorize.create_refresh_token(
+        subject=user.email,
+        user_claims={'access_token_jti': access_token_jti}
+    )
     await user_service.add_user_login_history(user.email, session)
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)
 
 
 @router.delete('/logout', status_code=HTTPStatus.OK)
-async def logout(  # TODO нужно ли обнулять все токены юзера со всех устройств ?
+async def logout(
         user_service: UserService = Depends(get_user_service),
         authorize: AuthJWT = Depends(auth_dep),
 ):
     """Эндпоинт разлогинивания пользователя путем добавления его refresh токена в блэк-лист Redis"""
-    await authorize.jwt_required()
+    await authorize.jwt_refresh_token_required()
     raw_jwt = await authorize.get_raw_jwt()
-    jti = raw_jwt['jti']
-    await user_service.redis.setex(jti, app_settings.refresh_expires, 'true')
+    refresh_token_jti = raw_jwt['jti']
+    access_token_jti = raw_jwt['access_token_jti']
+    await user_service.redis.setex(refresh_token_jti, app_settings.refresh_expires, 'true')
+    await user_service.redis.setex(access_token_jti, app_settings.access_expires, 'true')
     return {"detail": "Logged out successfully"}
 
 
