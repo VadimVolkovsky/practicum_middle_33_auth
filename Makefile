@@ -30,3 +30,12 @@ flake8:
 
 test:
 	$(EXEC_CORE) pytest
+
+makemigrations:
+	$(EXEC_CORE) alembic revision --autogenerate
+
+migrate:
+	$(EXEC_CORE) alembic upgrade head
+
+# migrate:
+#     $(EXEC_CORE) run  alembic alembic upgrade head
