@@ -1,9 +1,8 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import declarative_base
 
 from core.config import app_settings
+from models import Base
 
-Base = declarative_base()
 dsn = (f'postgresql+asyncpg://{app_settings.postgres_user}:{app_settings.postgres_password}@'
        f'{app_settings.postgres_host}:{app_settings.postgres_port}/{app_settings.postgres_db}')
 engine = create_async_engine(dsn, echo=app_settings.echo, future=True)

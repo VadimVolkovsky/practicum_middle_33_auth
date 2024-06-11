@@ -20,6 +20,7 @@ Werkzeug==3.0.3
 orjson==3.10.3
 psycopg2-binary==2.9.9
 backoff==2.2.1
+alembic==1.13.1
 
 # testing
 pytest==8.2.0

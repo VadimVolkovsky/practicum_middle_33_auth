@@ -33,3 +33,9 @@ test:
 
 superuser:
 	docker exec middle_practicum_api python superuser.py
+
+makemigrations:
+	$(EXEC_CORE) alembic revision --autogenerate
+
+migrate:
+	$(EXEC_CORE) alembic upgrade head
