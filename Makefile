@@ -36,6 +36,3 @@ makemigrations:
 
 migrate:
 	$(EXEC_CORE) alembic upgrade head
-
-# migrate:
-#     $(EXEC_CORE) run  alembic alembic upgrade head

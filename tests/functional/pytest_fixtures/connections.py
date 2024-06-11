@@ -5,7 +5,7 @@ import pytest_asyncio
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
-from db.postgres import Base
+from models import Base
 from main import app
 from tests.settings import test_settings
 
