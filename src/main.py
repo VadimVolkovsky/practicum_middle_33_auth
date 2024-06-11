@@ -20,8 +20,8 @@ from services import redis
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if app_settings.debug is True:
-        await purge_database()
-        await create_database()
+        # await purge_database()  # TODO использовать алембик
+        # await create_database()  # TODO использовать алембик
         await add_default_roles()
 
     redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
