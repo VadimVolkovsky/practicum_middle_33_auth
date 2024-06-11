@@ -5,6 +5,7 @@ import uvicorn
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi import FastAPI, Request
 from fastapi.responses import ORJSONResponse
+from fastapi_pagination import add_pagination
 from redis.asyncio import Redis
 from starlette.responses import JSONResponse
 
@@ -40,6 +41,7 @@ app = FastAPI(
 
 
 app.include_router(main_router, prefix='/api/v1')
+add_pagination(app)
 
 
 # TODO подумать куда вынести

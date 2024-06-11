@@ -97,7 +97,8 @@ async def test_get_user_login_history(user_authenticated_client):
     response_body = response.json()
 
     assert status == HTTPStatus.OK
-    assert 'login_date' in response_body
+    assert 'items' in response_body
+    assert 'login_date' in response_body['items'][0]
 
 
 @pytest.mark.asyncio
