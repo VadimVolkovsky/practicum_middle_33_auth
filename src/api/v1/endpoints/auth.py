@@ -70,7 +70,7 @@ async def logout(
         user_service: UserService = Depends(get_user_service),
         authorize: AuthJWT = Depends(auth_dep),
 ):
-    """Эндпоинт разлогинивания пользователя путем добавления его refresh токена в блэк-лист Redis"""
+    """Эндпоинт разлогинивания пользователя путем добавления его refresh и access токенов в блэк-лист Redis"""
     await authorize.jwt_refresh_token_required()
     raw_jwt = await authorize.get_raw_jwt()
     refresh_token_jti = raw_jwt['jti']
@@ -101,8 +101,6 @@ async def change_user_data(
 ):
     """Эндпоинт для обновления данных пользователя"""
     await authorize.jwt_required()
-
-    # Обновляем данные пользователя в БД
     raw_jwt = await authorize.get_raw_jwt()
     email = raw_jwt['sub']
     await user_service.update_user_info(user_input_data, email, session)
