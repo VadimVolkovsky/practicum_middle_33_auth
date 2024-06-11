@@ -43,7 +43,7 @@ class UserLoginHistoryInDB(BaseModel):
     """
     UserLoginHistoryInDB — это то, что мы будем отдавать пользователю — детальную информацию по нужным полям модели.
     """
-    login_date: list[datetime.datetime]
+    login_date: datetime.datetime
 
 
 class JWTResponse(BaseModel):

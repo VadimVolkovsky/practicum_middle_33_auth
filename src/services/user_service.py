@@ -70,13 +70,11 @@ class UserService:
         obj_in = UserLoginHistory(user_id=user_data.id)
         await user_login_history_crud.create(obj_in, session)
 
-    async def get_user_login_history(self, user: User, session: AsyncSession) -> UserLoginHistoryInDB:
+    async def get_user_login_history(self, user: User, session: AsyncSession) -> list[UserLoginHistoryInDB]:
         """
         Метод для получения истории входов пользователя.
         """
-        db_data = await user_login_history_crud.get_user_login_history(user, session)
-        login_date = [db_obj.login_date for db_obj in db_data]
-        user_login_history = UserLoginHistoryInDB(login_date=login_date)
+        user_login_history = await user_login_history_crud.get_user_login_history(user, session)
         return user_login_history
 
 

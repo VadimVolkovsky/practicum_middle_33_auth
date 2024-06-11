@@ -3,6 +3,7 @@ from http import HTTPStatus
 from async_fastapi_jwt_auth import AuthJWT
 from async_fastapi_jwt_auth.auth_jwt import AuthJWTBearer
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_pagination import Page, paginate
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import AppSettings, app_settings
@@ -91,40 +92,10 @@ async def refresh(authorize: AuthJWT = Depends(auth_dep)):
     return {"access_token": new_access_token}
 
 
-@router.delete('/access-revoke')
-async def access_revoke(
-        authorize: AuthJWT = Depends(),
-        user_service: UserService = Depends(get_user_service)):
-    """
-    Эндпоинт деактивации access токена путем добавления его в блэк-лист Redis.
-    По истечении срока действия токена, он автоматически удаляется из Redis
-    """
-    await authorize.jwt_required()
-    raw_jwt = await authorize.get_raw_jwt()
-    jti = raw_jwt['jti']
-    await user_service.redis.setex(jti, app_settings.access_expires, 'true')
-    return {"detail": "Access token has been revoke"}
-
-
-@router.delete('/refresh-revoke')
-async def refresh_revoke(
-        authorize: AuthJWT = Depends(),
-        user_service: UserService = Depends(get_user_service)):
-    """
-    Эндпоинт деактивации refresh токена путем добавления его в блек-лист Redis.
-    По истечении срока действия токена, он автоматически удаляется из Redis
-    """
-    await authorize.jwt_refresh_token_required()
-    raw_jwt = await authorize.get_raw_jwt()
-    jti = raw_jwt['jti']
-    await user_service.redis.setex(jti, app_settings.refresh_expires, 'true')
-    return {"detail": "Refresh token has been revoke"}
-
-
 @router.post('/user_update', status_code=HTTPStatus.OK)
 async def change_user_data(
         user_input_data: UserUpdate,
-        authorize: AuthJWT = Depends(),
+        authorize: AuthJWT = Depends(auth_dep),
         user_service: UserService = Depends(get_user_service),
         session: AsyncSession = Depends(get_session)
 ):
@@ -140,14 +111,16 @@ async def change_user_data(
     return {"detail": "Data were updated successfully"}
 
 
-@router.get('/user_login_history', response_model=UserLoginHistoryInDB, status_code=HTTPStatus.OK)
+@router.get('/user_login_history', response_model=Page[UserLoginHistoryInDB], status_code=HTTPStatus.OK)
 async def get_user_login_history(
-        authorize: AuthJWT = Depends(),
+        authorize: AuthJWT = Depends(auth_dep),
         user_service: UserService = Depends(get_user_service),
         session: AsyncSession = Depends(get_session)
 ):
-    """Эндпоинт для получения информации об истории входохов пользователя"""
+    """Эндпоинт для получения информации об истории входов пользователя"""
     await authorize.jwt_required()
     email = await authorize.get_jwt_subject()
     user = await user_service.get_user_by_email(email, session)
-    return await user_service.get_user_login_history(user, session)
+    user_login_history = await user_service.get_user_login_history(user, session)
+    return paginate(user_login_history)
+

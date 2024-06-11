@@ -8,7 +8,7 @@ from models.entity import UserLoginHistory, User
 class CRUDUserLoginHistory(CRUDBase):
     """Класс для работы с моделью UserLoginHistory в БД"""
 
-    async def get_user_login_history(self, user: User, session: AsyncSession, limit=5) -> UserLoginHistory:
+    async def get_user_login_history(self, user: User, session: AsyncSession) -> UserLoginHistory:
         """
         Метод для получения истории входов пользователя.
         По умолчанию возвращается 5 последних входов
@@ -17,7 +17,6 @@ class CRUDUserLoginHistory(CRUDBase):
             select(self.model)
             .where(self.model.user_id == user.id)
             .order_by(self.model.login_date.desc())
-            .limit(limit)
         )
         return db_obj.scalars().all()
 
