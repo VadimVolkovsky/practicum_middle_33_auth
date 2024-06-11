@@ -50,6 +50,7 @@ class User(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow)
     role_id: Mapped[Role] = mapped_column(ForeignKey('roles.id'), default=1)
     role = relationship("Role", lazy="selectin")
+    login_history = relationship('UserLoginHistory', back_populates='user', passive_deletes=True)
 
     def __init__(self, email: str, password: str, first_name: str, last_name: str, role: int = None) -> None:
         self.email = email
@@ -69,8 +70,9 @@ class UserLoginHistory(Base):
     __tablename__ = 'user_login_history'
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
-    user: Mapped[User] = mapped_column(ForeignKey('users.id'), nullable=False)
+    user_id: Mapped[User] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user = relationship('User', back_populates='login_history')
     login_date: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow)
 
-    def __init__(self, user: User) -> None:
-        self.user = user
+    def __init__(self, user_id: User) -> None:
+        self.user_id = user_id

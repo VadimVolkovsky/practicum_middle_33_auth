@@ -60,11 +60,12 @@ async def test_login_user(default_user, user_anonymous_client, body, expected_an
         assert response_body['detail'] == "Bad email or password"
 
 
-# TODO пофиксить токен на акссес
 @pytest.mark.asyncio
 async def test_logout_user(user_authenticated_client):
     """Тест выхода пользователя"""
     url = 'http://127.0.0.1:8000/api/v1/auth/logout'
+    refresh_token = user_authenticated_client.cookies['refresh_token']
+    user_authenticated_client.headers['Authorization'] = f'Bearer {refresh_token}'
     response = await user_authenticated_client.delete(url)
     status = response.status_code
     response_body = response.json()
@@ -99,7 +100,6 @@ async def test_get_user_login_history(user_authenticated_client):
     assert 'login_date' in response_body
 
 
-# TODO после этого теста меняются данные юзера в БД и последующие тесты не проходят с прошлым email
 @pytest.mark.asyncio
 async def test_change_user_data(user_authenticated_client):
     """Тест обновления данных пользователя"""
