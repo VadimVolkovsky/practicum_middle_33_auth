@@ -7,7 +7,6 @@ from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1.serializers.role_serializer import AssignRoleSerializer, RoleCreateSerializer
-from core.schemas.entity import UserInDB
 from db.postgres import get_session
 from helperes.auth_request import AuthRequest
 from helperes.exceptions import AuthException

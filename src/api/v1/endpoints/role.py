@@ -1,15 +1,13 @@
 from http import HTTPStatus
 
-from async_fastapi_jwt_auth import AuthJWT
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1.serializers.role_serializer import RoleSerializer, RoleCreateSerializer, AssignRoleSerializer
 from db.postgres import get_session
 from helperes.auth import roles_required
 from helperes.auth_request import AuthRequest
-from models.entity import User, ROLES
+from models.entity import ROLES
 from services.role_servece import RoleService, get_role_service
 from services.user_service import UserService, get_user_service
 
@@ -40,7 +38,7 @@ async def create_role(request: AuthRequest,
     return await role_service.create(role_data, session)
 
 
-@router.post('/assign_user',response_model=AssignRoleSerializer, status_code=HTTPStatus.OK)
+@router.post('/assign_user', response_model=AssignRoleSerializer, status_code=HTTPStatus.OK)
 @roles_required(roles_list=[ROLES[2]])
 async def add_role_user(request: AuthRequest,
                         email: str,
