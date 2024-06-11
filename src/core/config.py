@@ -22,9 +22,11 @@ class AppSettings(BaseSettings):
     postgres_db: str
     postgres_user: str
     postgres_password: str
+    echo: bool = False  # вывод операций с БД в логи
 
     redis_host: str
     redis_port: int
+
 
     authjwt_secret_key: str = "secret"
     authjwt_denylist_enabled: bool = True

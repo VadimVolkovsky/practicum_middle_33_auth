@@ -1,12 +1,12 @@
 import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class UserCreate(BaseModel):
     """Cхема UserCreate описывает то, что мы ожидаем получить при создании записи в базе данных. """
-    username: str
+    email: EmailStr
     password: str
     first_name: str
     last_name: str
@@ -14,13 +14,13 @@ class UserCreate(BaseModel):
 
 class UserLogin(BaseModel):
     """Модель для работы с аутентификацией пользователя"""
-    username: str
+    email: EmailStr
     password: str
 
 
 class UserUpdate(BaseModel):
     """Модель обновления данных пользователя"""
-    username: str | None = None
+    email: EmailStr | None = None
     password: str | None = None
 
 

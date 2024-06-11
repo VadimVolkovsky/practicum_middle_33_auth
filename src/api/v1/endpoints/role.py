@@ -22,7 +22,7 @@ async def get_roles(
 
     # await authorize.jwt_refresh_token_required()
     user_username = await authorize.get_jwt_subject()
-    db_user = await session.execute(select(User).where(User.login == user_username))
+    db_user = await session.execute(select(User).where(User.email == user_username))
     user = db_user.scalars().first()
 
     if user.role.name != 'admin':
@@ -39,7 +39,7 @@ async def create_role(role_data: RoleCreateSerializer, authorize: AuthJWT = Depe
     # await authorize.jwt_refresh_token_required()
     user_username = await authorize.get_jwt_subject()
 
-    db_user = await session.execute(select(User).where(User.login == user_username))
+    db_user = await session.execute(select(User).where(User.email == user_username))
     user = db_user.scalars().first()
 
     if user.role.name != 'admin':
@@ -60,18 +60,18 @@ async def add_role_user(username: str,
                         session: AsyncSession = Depends(get_session)):
     # await authorize.jwt_refresh_token_required()
     user_username = await authorize.get_jwt_subject()
-    request_user = await user_service.get_user_by_login(user_username, session)
+    request_user = await user_service.get_user_by_username(user_username, session)
 
     if request_user.role.name != 'admin':
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='You have no permission to create role')
 
-    user = await user_service.get_user_by_login(username, session)
+    user = await user_service.get_user_by_username(username, session)
     role = await role_service.get_by_name(role_name, session)
 
     user = await role_service.assign_role(role, user, session)
 
     return AssignRoleSerializer(
-        username=user.login,
+        username=user.email,
         role=RoleSerializer(id=role.id, name=role.name)
     )
 
@@ -85,16 +85,16 @@ async def revoke_role(
         session: AsyncSession = Depends(get_session)):
     # await authorize.jwt_refresh_token_required()
     user_username = await authorize.get_jwt_subject()
-    request_user = await user_service.get_user_by_login(user_username, session)
+    request_user = await user_service.get_user_by_username(user_username, session)
 
     if request_user.role.name != 'admin':
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='You have no permission to create role')
 
-    user = await user_service.get_user_by_login(username, session)
+    user = await user_service.get_user_by_username(username, session)
     role = await role_service.get_default_role(session)
     user = await role_service.assign_role(role, user, session)
 
     return AssignRoleSerializer(
-        username=user.login,
+        username=user.email,
         role=RoleSerializer(id=role.id, name=role.name)
     )

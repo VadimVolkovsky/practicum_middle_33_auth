@@ -40,7 +40,7 @@ class User(Base):
     __tablename__ = 'users'
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
-    username: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50))
@@ -50,8 +50,8 @@ class User(Base):
     role = relationship("Role", lazy="selectin")
     login_history = relationship('UserLoginHistory', back_populates='user', passive_deletes=True)
 
-    def __init__(self, username: str, password: str, first_name: str, last_name: str, role: int = None) -> None:
-        self.username = username
+    def __init__(self, email: str, password: str, first_name: str, last_name: str, role: int = None) -> None:
+        self.email = email
         self.password = generate_password_hash(password)
         self.first_name = first_name
         self.last_name = last_name
@@ -61,7 +61,7 @@ class User(Base):
         return check_password_hash(self.password, password)
 
     def __repr__(self) -> str:
-        return f'<User {self.username}>'
+        return f'<User {self.email}>'
 
 
 class UserLoginHistory(Base):
