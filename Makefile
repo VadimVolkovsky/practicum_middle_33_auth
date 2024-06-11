@@ -30,3 +30,6 @@ flake8:
 
 test:
 	$(EXEC_CORE) pytest
+
+superuser:
+	docker exec middle_practicum_api python superuser.py
