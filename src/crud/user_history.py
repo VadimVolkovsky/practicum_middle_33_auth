@@ -15,7 +15,7 @@ class CRUDUserLoginHistory(CRUDBase):
         """
         db_obj = await session.execute(
             select(self.model)
-            .where(self.model.user == user.id)
+            .where(self.model.user_id == user.id)
             .order_by(self.model.login_date.desc())
             .limit(limit)
         )
