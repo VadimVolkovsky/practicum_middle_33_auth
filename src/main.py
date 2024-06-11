@@ -18,9 +18,11 @@ from services import redis
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await purge_database()  # TODO только для отладки приложения
-    await create_database()  # TODO только для отладки приложения
-    await add_default_roles()  # TODO только для отладки приложения
+    if app_settings.debug is True:
+        await purge_database()  # TODO только для отладки приложения
+        await create_database()  # TODO только для отладки приложения
+        await add_default_roles()  # TODO только для отладки приложения
+
     redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
     yield
     await redis.redis.close()
