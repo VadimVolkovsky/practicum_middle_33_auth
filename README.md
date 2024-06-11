@@ -22,6 +22,7 @@ POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
 REDIS_HOST=redis
 REDIS_PORT=6379
+DATABASE_URL=postgresql+asyncpg://app:123qwe@middle_practicum_auth_postgres:5432/auth_database
 
 ## Local run for debug:
 #POSTGRES_DB=auth_database
@@ -30,7 +31,8 @@ REDIS_PORT=6379
 #POSTGRES_HOST=localhost
 #POSTGRES_PORT=5433
 #REDIS_HOST=localhost
-#REDIS_PORT=6380" > .env
+#REDIS_PORT=6380
+#DATABASE_URL=postgresql+asyncpg://app:123qwe@localhost:5433/auth_database" > .env
 ```
 
 
