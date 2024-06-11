@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from crud.base import CRUDBase
-from models.entity import Role, User, ROLES
+from models.entity import Role, User, Roles
 
 
 class RoleService(CRUDBase):
@@ -25,7 +25,7 @@ class RoleService(CRUDBase):
         return user
 
     async def get_default_role(self, session: AsyncSession) -> Role:
-        default_role = ROLES[0]
+        default_role = Roles.user.value
 
         if not (default_role := await self.get_by_name(default_role, session)):
             default_role = await self.create(default_role, session)
