@@ -14,5 +14,5 @@ class RoleSerializer(RoleCreateSerializer):
 class AssignRoleSerializer(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    username: str
+    email: str
     role: RoleSerializer
