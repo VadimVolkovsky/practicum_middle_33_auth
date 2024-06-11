@@ -7,7 +7,7 @@ from api.v1.serializers.role_serializer import RoleSerializer, RoleCreateSeriali
 from db.postgres import get_session
 from helperes.auth import roles_required
 from helperes.auth_request import AuthRequest
-from models.entity import ROLES
+from models.entity import Roles
 from services.role_servece import RoleService, get_role_service
 from services.user_service import UserService, get_user_service
 
@@ -15,7 +15,7 @@ router = APIRouter()
 
 
 @router.get('', response_model=list[RoleSerializer], status_code=HTTPStatus.OK)
-@roles_required(roles_list=[ROLES[2]])
+@roles_required(roles_list=[Roles.admin.value])
 async def get_roles(request: AuthRequest,
                     role_service: RoleService = Depends(get_role_service),
                     session: AsyncSession = Depends(get_session)):
@@ -25,7 +25,7 @@ async def get_roles(request: AuthRequest,
 
 
 @router.post('/create', response_model=RoleSerializer, status_code=HTTPStatus.CREATED)
-@roles_required(roles_list=[ROLES[2]])
+@roles_required(roles_list=[Roles.admin.value])
 async def create_role(request: AuthRequest,
                       role_data: RoleCreateSerializer,
                       role_service: RoleService = Depends(get_role_service),
@@ -39,7 +39,7 @@ async def create_role(request: AuthRequest,
 
 
 @router.post('/assign_user', response_model=AssignRoleSerializer, status_code=HTTPStatus.OK)
-@roles_required(roles_list=[ROLES[2]])
+@roles_required(roles_list=[Roles.admin.value])
 async def add_role_user(request: AuthRequest,
                         email: str,
                         role_name: str,
@@ -60,7 +60,7 @@ async def add_role_user(request: AuthRequest,
 
 
 @router.post('/cancel_user', response_model=AssignRoleSerializer, status_code=HTTPStatus.OK)
-@roles_required(roles_list=[ROLES[2]])
+@roles_required(roles_list=[Roles.admin.value])
 async def revoke_role(request: AuthRequest,
                       email: str,
                       role_service: RoleService = Depends(get_role_service),

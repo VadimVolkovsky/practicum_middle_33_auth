@@ -1,6 +1,7 @@
 import contextlib
 import datetime
 import uuid
+from enum import Enum
 
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -8,11 +9,12 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from db.postgres import Base, get_session
 
-ROLES = (
-    'user',
-    'subscriber',
-    'admin',
-)
+
+class Roles(Enum):
+    user: str = 'user'
+    superuser: str = 'superuser'
+    admin: str = 'admin'
+
 
 # получение DI через контекстный менеджер
 get_async_session_context = contextlib.asynccontextmanager(get_session)
@@ -21,8 +23,8 @@ get_async_session_context = contextlib.asynccontextmanager(get_session)
 async def add_default_roles():
     """Добавляет роли в БД при старте приложения"""
     async with get_async_session_context() as db_session:
-        for role in ROLES:
-            role_obj = Role(name=role)
+        for role in Roles:
+            role_obj = Role(name=role.value)
             db_session.add(role_obj)
             await db_session.commit()
 
