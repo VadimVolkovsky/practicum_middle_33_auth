@@ -13,6 +13,6 @@ ENV PYTHONPATH /app/src
 RUN  pip install --upgrade pip \
      && pip install --no-cache-dir -r /app/requirements.txt
 
-COPY  src /app/src
+COPY  src_auth /app/src
 
 WORKDIR app/src
