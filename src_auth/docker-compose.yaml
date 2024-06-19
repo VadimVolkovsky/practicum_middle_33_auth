@@ -1,0 +1,80 @@
+services:
+  api:
+    image: async_api_image
+    build: ..
+    restart: always
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    ports:
+      - 0:8000
+#    command: uvicorn main:app --reload --host $SERVICE_HOST --port $SERVICE_PORT
+    command: gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind $SERVICE_HOST:$SERVICE_PORT
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - auth_network
+    container_name: 'auth_api'
+
+  postgres:
+    image: postgres:16.0
+    ports:
+      - "0:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    healthcheck:
+        test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -p ${POSTGRES_PORT}" ]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+    networks:
+      - auth_network
+    container_name: 'auth_postgres'
+
+  redis:
+    image: redis:7.2.5
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+    env_file:
+      - .env
+    ports:
+      - 0:6379
+    networks:
+      - auth_network
+    container_name: 'auth_redis'
+
+  nginx_auth:
+    image: nginx:1.19.2
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/configs:/etc/nginx/conf.d:ro
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+    networks:
+      - auth_network
+    container_name: 'auth_nginx'
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  auth_network:
+#    driver: bridge
+#
+#networks:
+#  auth_network:
+#    driver: bridge
+#    ipam:
+#      config:
+#        - subnet: 172.16.57.0/24
+#

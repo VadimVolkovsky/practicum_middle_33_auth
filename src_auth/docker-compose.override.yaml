@@ -1,7 +1,7 @@
 services:
   api:
     image: async_api_image
-    build: .
+    build: ..
     restart: always
     volumes:
       - .:/app

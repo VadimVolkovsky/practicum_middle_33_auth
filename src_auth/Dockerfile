@@ -2,8 +2,8 @@ FROM python:3.12
 
 RUN mkdir /app
 
-COPY ./requirements.txt /app/requirements.txt
-COPY ./.env /app/.env
+COPY requirements.txt /app/requirements.txt
+COPY .env /app/.env
 COPY .flake8 /app/
 
 ENV PYTHONDONTWRITEBYTECODE 1
