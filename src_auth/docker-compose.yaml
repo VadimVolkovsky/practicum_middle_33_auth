@@ -69,8 +69,8 @@ volumes:
 
 networks:
   auth_network:
-#    driver: bridge
-#
+    driver: bridge
+
 #networks:
 #  auth_network:
 #    driver: bridge
