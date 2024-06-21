@@ -1,0 +1,6 @@
+[tool.pytest.ini_options]
+testpaths = [
+    "src/tests"
+]
+
+# для дебага тестов, иначе пайчарм не видит путь до фикстур

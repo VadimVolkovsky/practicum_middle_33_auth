@@ -1,0 +1,80 @@
+version: '3.4'
+services:
+
+  content_api:
+    image: content_api_image
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    restart: always
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - API_REDIS_HOST=redis
+    ports:
+      - "0:8000"
+    networks:
+     - content_network
+    command: gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+    depends_on:
+      - content_redis
+      - content_elasticsearch
+    container_name: 'content_api'
+
+  content_redis:
+    image: redis:latest
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "0:6379"
+    networks:
+      - content_network
+    container_name: 'content_redis'
+
+  content_elasticsearch:
+    image: elasticsearch:8.13.0
+    healthcheck:
+      test: curl -s http://content_elasticsearch:9200 >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 50
+    volumes:
+#      - ./src/db/elasticsearch/data/:/usr/share/elasticsearch/data
+    - esdata01:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms200m -Xmx200m
+    ports:
+      - "0:9200"
+    networks:
+      - content_network
+    container_name: 'content_elasticsearch'
+
+
+  content_nginx:
+    image: nginx:1.19.2
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/configs:/etc/nginx/conf.d:ro
+    depends_on:
+      - content_api
+    ports:
+      - "82:80"
+    networks:
+      - content_network
+    container_name: 'content_nginx'
+
+
+volumes:
+  esdata01:
+
+networks:
+  content_network:
+    driver: bridge
