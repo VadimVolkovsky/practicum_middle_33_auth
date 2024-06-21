@@ -1,0 +1,31 @@
+version: '3.4'
+services:
+  api:
+    extends:
+      service: api
+      file: docker-compose.override.yaml
+
+  redis:
+    extends:
+      service: redis
+      file: docker-compose.override.yaml
+
+  elasticsearch:
+    extends:
+      service: elasticsearch
+      file: docker-compose.override.yaml
+
+
+  tests:
+    image: async_api_image
+    depends_on:
+      - api
+      - redis
+      - elasticsearch
+    env_file:
+      - ./.env
+    entrypoint: >
+      sh -c "pip install -r tests/functional/requirements.txt
+      && python3 tests/functional/utils/wait_for_es.py
+      && python3 tests/functional/utils/wait_for_redis.py
+      && pytest tests/functional/src"
