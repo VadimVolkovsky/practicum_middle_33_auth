@@ -1,6 +1,6 @@
 services:
   auth_api:
-    image: async_api_image
+    image: auth_api_image
     build: .
     restart: always
     volumes:
