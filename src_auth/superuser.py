@@ -2,8 +2,8 @@ import typer
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from core.config import app_settings
-from models.entity import User, Role
+from src.core.config import app_settings
+from src.models.entity import User, Role
 
 Base = declarative_base()
 dsn = (f'postgresql+psycopg2://{app_settings.postgres_user}:{app_settings.postgres_password}@'

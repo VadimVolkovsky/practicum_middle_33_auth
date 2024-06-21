@@ -1,7 +1,7 @@
 services:
-  api:
+  auth_api:
     image: async_api_image
-    build: ..
+    build: .
     restart: always
     volumes:
       - .:/app
@@ -9,23 +9,22 @@ services:
       - .env
     ports:
       - 0:8000
-#    command: uvicorn main:app --reload --host $SERVICE_HOST --port $SERVICE_PORT
-    command: gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind $SERVICE_HOST:$SERVICE_PORT
+    command: gunicorn src.main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind $SERVICE_HOST:$SERVICE_PORT
     depends_on:
-      redis:
+      auth_redis:
         condition: service_healthy
-      postgres:
+      auth_postgres:
         condition: service_healthy
     networks:
       - auth_network
     container_name: 'auth_api'
 
-  postgres:
+  auth_postgres:
     image: postgres:16.0
     ports:
       - "0:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data_auth:/var/lib/postgresql/data/
     env_file:
       - .env
     healthcheck:
@@ -37,7 +36,7 @@ services:
       - auth_network
     container_name: 'auth_postgres'
 
-  redis:
+  auth_redis:
     image: redis:7.2.5
     healthcheck:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
@@ -50,21 +49,21 @@ services:
       - auth_network
     container_name: 'auth_redis'
 
-  nginx_auth:
+  auth_nginx:
     image: nginx:1.19.2
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/configs:/etc/nginx/conf.d:ro
     depends_on:
-      - api
+      - auth_api
     ports:
-      - "80:80"
+      - "81:80"
     networks:
       - auth_network
     container_name: 'auth_nginx'
 
 volumes:
-  postgres_data:
+  postgres_data_auth:
   redis_data:
 
 networks:
