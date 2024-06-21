@@ -1,3 +1,3 @@
 include:
-  - src_admin_panel/docker-compose.yaml
-  - src_auth/docker-compose.yaml
+  - admin_panel_service/docker-compose.yaml
+  - auth_service/docker-compose.yaml

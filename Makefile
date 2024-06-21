@@ -5,7 +5,7 @@ EXEC_CORE:=$(DOCKER_COMPOSE) exec auth_api
 # work with docker
 
 build:
-#	export DOCKER_BUILDKIT=1 && docker build -f src_auth/Dockerfile -t async_api_image .
+#	export DOCKER_BUILDKIT=1 && docker build -f auth_service/Dockerfile -t async_api_image .
 	$(DOCKER_COMPOSE) build
 
 ps:
