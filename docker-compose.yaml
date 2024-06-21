@@ -1,3 +1,4 @@
 include:
   - admin_panel_service/docker-compose.yaml
   - auth_service/docker-compose.yaml
+  - content_service/docker-compose.yaml
