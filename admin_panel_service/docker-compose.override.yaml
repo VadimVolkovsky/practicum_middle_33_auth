@@ -1,0 +1,29 @@
+version: '3'
+services:
+
+  admin_panel_postgres:
+    ports:
+      - "5435:5435"
+
+  admin_panel_django:
+    ports:
+      - "8000:8000"
+
+  admin_panel_nginx:
+    entrypoint: [ "echo", "Service nginx disabled in dev mode" ]
+
+volumes:
+  postgres_data:
+  static_value:
+  media_value:
+
+networks:
+  admin_panel_network:
+    driver: bridge
+
+#networks:
+#  admin_panel_network:
+#    ipam:
+#      driver: default
+#      config:
+#        - subnet: 172.16.58.0/24

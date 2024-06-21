@@ -1,0 +1,25 @@
+services:
+  auth_api:
+    ports:
+      - 8000:8000
+    command: uvicorn src.main:app --reload --host $SERVICE_HOST --port $SERVICE_PORT
+
+  auth_postgres:
+    ports:
+      - "5433:5432"
+
+  auth_redis:
+    ports:
+      - 6380:6379
+
+  auth_nginx:
+    entrypoint: [ "echo", "Service nginx disabled in dev mode" ]
+
+
+volumes:
+  postgres_data_auth:
+  redis_data:
+
+networks:
+  auth_network:
+    driver: bridge

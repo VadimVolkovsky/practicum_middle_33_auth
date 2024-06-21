@@ -1,17 +1,19 @@
 DOCKER_COMPOSE:=docker compose
-EXEC_CORE:=$(DOCKER_COMPOSE) exec api
+EXEC_CORE:=$(DOCKER_COMPOSE) exec auth_api
 
 
 # work with docker
 
 build:
-	export DOCKER_BUILDKIT=1 && docker build -f ./Dockerfile -t async_api_image .
+#	export DOCKER_BUILDKIT=1 && docker build -f auth_service/Dockerfile -t async_api_image .
+	$(DOCKER_COMPOSE) build
 
 ps:
 	$(DOCKER_COMPOSE) ps
 
 up:
 	$(DOCKER_COMPOSE) up
+
 
 restart:
 	$(DOCKER_COMPOSE) restart
@@ -31,11 +33,14 @@ flake8:
 test:
 	$(EXEC_CORE) pytest
 
-superuser:
-	docker exec middle_practicum_api python superuser.py
-
 makemigrations:
 	$(EXEC_CORE) alembic revision --autogenerate
 
 migrate:
 	$(EXEC_CORE) alembic upgrade head
+
+roles:
+	$(EXEC_CORE) python create_roles.py
+
+superuser:
+	$(EXEC_CORE) python superuser.py
