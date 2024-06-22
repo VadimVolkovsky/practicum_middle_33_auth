@@ -1,14 +1,15 @@
+import datetime
 from http import HTTPStatus
 
 from async_fastapi_jwt_auth import AuthJWT
 from async_fastapi_jwt_auth.auth_jwt import AuthJWTBearer
+from core.schemas.entity import UserInDB, UserCreate, UserLogin, JWTResponse, UserUpdate, UserLoginHistoryInDB
+from db.postgres import get_session
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, paginate
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import AppSettings, app_settings
-from core.schemas.entity import UserInDB, UserCreate, UserLogin, JWTResponse, UserUpdate, UserLoginHistoryInDB
-from db.postgres import get_session
 from src.services import redis
 from src.services.user_service import get_user_service, UserService
 
@@ -63,6 +64,29 @@ async def login(
     )
     await user_service.add_user_login_history(user.email, session)
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)
+
+
+@router.post('/check_token', status_code=HTTPStatus.OK)
+async def check_token(
+        user_service: UserService = Depends(get_user_service),
+        authorize: AuthJWT = Depends(auth_dep),
+        session: AsyncSession = Depends(get_session)
+):
+    """
+    Эндпоинт для проверки актуальности токена.
+    Если у токена истек срок жизни, возвращаем код 403
+    Если токен валиден, возвращаем в ответе данные пользователя из БД
+    """
+    await authorize.jwt_required()
+    raw_jwt = await authorize.get_raw_jwt()
+    token_expire_date = raw_jwt["exp"]
+    time_now = datetime.datetime.utcnow().timestamp()
+    if time_now >= token_expire_date:
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Token expired")
+
+    email = raw_jwt['sub']
+    user = await user_service.get_user_by_email(email, session)
+    return {'email': user.email, 'role': user.role.name}
 
 
 @router.delete('/logout', status_code=HTTPStatus.OK)

@@ -4,47 +4,74 @@ services:
   admin_panel_postgres:
     ports:
       - "5435:5432"
+    networks:
+      - practicum_network
 
   admin_panel_django:
     ports:
       - "8000:8000"
+    networks:
+      - practicum_network
 
   admin_panel_nginx:
     ports:
       - "80:80"
+    networks:
+      - practicum_network
 
   ### service auth ###
   auth_api:
     ports:
       - 8001:8000
     command: uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+    networks:
+      - practicum_network
 
   auth_postgres:
     ports:
       - "5433:5432"
+    networks:
+      - practicum_network
 
   auth_redis:
     ports:
       - 6380:6379
+    networks:
+      - practicum_network
 
   auth_nginx:
     ports:
       - "81:80"
+    networks:
+      - practicum_network
 
   ### service content ###
   content_api:
     ports:
       - "8002:8000"
     command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
+    networks:
+      - practicum_network
 
   content_redis:
     ports:
       - "6382:6379"
+    networks:
+      - practicum_network
 
   content_elasticsearch:
     ports:
       - "9200:9200"
+    networks:
+      - practicum_network
 
   content_nginx:
     ports:
       - "82:80"
+    networks:
+      - practicum_network
+
+
+networks:
+  practicum_network:
+    driver: bridge
