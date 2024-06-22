@@ -10,7 +10,13 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-class JaegerSettings(BaseSettings):
+class AuthBaseSettings(BaseSettings):
+    class Config:
+        env_file = '.env'
+        extra = 'ignore'
+
+
+class JaegerSettings(AuthBaseSettings):
     jaeger_host: str = Field(
         default='auth_jaeger',
     )
@@ -19,11 +25,8 @@ class JaegerSettings(BaseSettings):
     )
     enable_tracer: bool = Field(default=True)
 
-    class Config:
-        env_file = '.env'
 
-
-class AppSettings(BaseSettings):
+class AppSettings(AuthBaseSettings):
     project_name: str = Field(default='auth')
 
     service_host: str
@@ -48,15 +51,12 @@ class AppSettings(BaseSettings):
 
     debug: bool = Field(default='False')
 
-    jaeger = JaegerSettings()
+    jaeger: JaegerSettings = JaegerSettings()
 
     @property
     def database_url(self):
         return (f'postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@'
                 f'{self.postgres_host}:{self.postgres_port}/{self.postgres_db}')
-
-    class Config:
-        env_file = '.env'
 
 
 app_settings = AppSettings()

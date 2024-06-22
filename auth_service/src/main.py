@@ -11,7 +11,7 @@ from redis.asyncio import Redis
 from starlette.responses import JSONResponse
 
 from api.v1.routers import main_router
-from auth_service.src.helperes.jaeger import configure_tracer
+from src.helperes.jaeger import configure_tracer
 from core.config import app_settings
 from core.logger import LOGGING
 from models.entity import add_default_roles
