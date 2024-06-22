@@ -10,6 +10,19 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+class JaegerSettings(BaseSettings):
+    jaeger_host: str = Field(
+        default='auth_jaeger',
+    )
+    jaeger_port: int = Field(
+        default=6831,
+    )
+    enable_tracer: bool = Field(default=True)
+
+    class Config:
+        env_file = '.env'
+
+
 class AppSettings(BaseSettings):
     project_name: str = Field(default='auth')
 
@@ -34,6 +47,8 @@ class AppSettings(BaseSettings):
     refresh_expires: int = 86400
 
     debug: bool = Field(default='False')
+
+    jaeger = JaegerSettings()
 
     @property
     def database_url(self):

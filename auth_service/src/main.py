@@ -10,6 +10,7 @@ from redis.asyncio import Redis
 from starlette.responses import JSONResponse
 
 from api.v1.routers import main_router
+from auth_service.src.helperes.jager import configure_tracer
 from core.config import app_settings
 from core.logger import LOGGING
 from models.entity import add_default_roles
@@ -26,9 +27,9 @@ async def lifespan(app: FastAPI):
 
     if app_settings.jaeger.enable_tracer:
         configure_tracer(
-            settings.jaeger.jaeger_host,
-            settings.jaeger.jaeger_port,
-            settings.service_name,
+            app_settings.jaeger.jaeger_host,
+            app_settings.jaeger.jaeger_port,
+            app_settings.project_name,
         )
 
     redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
