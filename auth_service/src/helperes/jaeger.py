@@ -5,14 +5,14 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
 
-def configure_tracer(jager_host: str, jager_port: int, service_name: str) -> None:
+def configure_tracer(jaeger_host: str, jaeger_port: int, service_name: str) -> None:
     resource = Resource(attributes={SERVICE_NAME: service_name})
     trace.set_tracer_provider(TracerProvider(resource=resource))
     trace.get_tracer_provider().add_span_processor(
         BatchSpanProcessor(
             JaegerExporter(
-                agent_host_name=jager_host,
-                agent_port=jager_port,
+                agent_host_name=jaeger_host,
+                agent_port=jaeger_port,
             )
         )
     )
