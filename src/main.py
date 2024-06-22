@@ -24,6 +24,13 @@ async def lifespan(app: FastAPI):
         # await create_database()  # TODO использовать алембик
         await add_default_roles()
 
+    if app_settings.jaeger.enable_tracer:
+        configure_tracer(
+            settings.jaeger.jaeger_host,
+            settings.jaeger.jaeger_port,
+            settings.service_name,
+        )
+
     redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
     yield
     await redis.redis.close()
@@ -38,6 +45,20 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
     lifespan=lifespan
 )
+
+
+@app.middleware("http")
+async def before_request(request: Request, call_next):
+    request_id = request.headers.get("X-Request-Id")
+    if not request_id:
+        return ORJSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": "X-Request-Id is required"},
+        )
+    with tracer.start_as_current_span("auth_request") as span:
+        span.set_attribute("http.request_id", request_id)
+        response = await call_next(request)
+        return response
 
 
 app.include_router(main_router, prefix='/api/v1')
