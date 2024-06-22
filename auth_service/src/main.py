@@ -1,5 +1,6 @@
 import logging
 from contextlib import asynccontextmanager
+from http import HTTPStatus
 
 import uvicorn
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
@@ -15,6 +16,9 @@ from core.config import app_settings
 from core.logger import LOGGING
 from models.entity import add_default_roles
 from services import redis
+
+
+tracer = trace.get_tracer(__name__)
 
 
 @asynccontextmanager
@@ -53,7 +57,7 @@ async def before_request(request: Request, call_next):
     request_id = request.headers.get("X-Request-Id")
     if not request_id:
         return ORJSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=HTTPStatus.BAD_REQUEST,
             content={"detail": "X-Request-Id is required"},
         )
     with tracer.start_as_current_span("auth_request") as span:
@@ -61,6 +65,7 @@ async def before_request(request: Request, call_next):
         response = await call_next(request)
         return response
 
+FastAPIInstrumentor.instrument_app(app)
 
 app.include_router(main_router, prefix='/api/v1')
 add_pagination(app)
