@@ -14,6 +14,19 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+# class JaegerSettings(BaseSettings):
+#     jaeger_host: str = Field(
+#         default='auth_jaeger',
+#     )
+#     jaeger_port: int = Field(
+#         default=6831,
+#     )
+#     enable_tracer: bool = Field(default=True)
+#
+#     class Config:
+#         env_file = '.env'
+
+
 class AppSettings(BaseSettings):
     # Настройки для запуска приложения в контейнерах
     project_name: str = 'movies'
@@ -21,6 +34,8 @@ class AppSettings(BaseSettings):
     redis_port: int = Field(default=6382)
     elastic_host: str = Field(default='content_elasticsearch')
     elastic_port: int = Field(default=9200)
+
+    # jaeger = JaegerSettings()
 
     # Настройки для локального дебага приложения (без контейнера)
     # redis_host: str = Field(default='127.0.0.1')

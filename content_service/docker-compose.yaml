@@ -71,6 +71,14 @@ services:
       - content_network
     container_name: 'content_nginx'
 
+  content_jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: content_jaeger
+    ports:
+      - '6832:6831/udp'
+      - '16687:16686'
+    networks:
+      - auth_network
 
 volumes:
   esdata01:

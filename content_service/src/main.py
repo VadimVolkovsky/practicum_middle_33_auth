@@ -15,6 +15,13 @@ from api.v1.routers import main_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # if app_settings.jaeger.enable_tracer:
+    #     configure_tracer(
+    #         app_settings.jaeger.jaeger_host,
+    #         app_settings.jaeger.jaeger_port,
+    #         app_settings.project_name,
+    #     )
+
     redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
     elastic.es = AsyncElasticsearch(hosts=[f'{app_settings.elastic_host}:{app_settings.elastic_port}'])
     yield
