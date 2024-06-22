@@ -1,65 +1,50 @@
 services:
-  api:
-    image: async_api_image
-    build: .
-    restart: always
-    volumes:
-      - .:/app
-    env_file:
-      - .env
-    ports:
-      - 8000:8000
-    command: uvicorn main:app --reload --host $SERVICE_HOST --port $SERVICE_PORT
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    networks:
-      - default
-    container_name: 'middle_practicum_api'
 
-  postgres:
-    image: postgres:16.0
+  ### service admin panel ###
+  admin_panel_postgres:
+    ports:
+      - "5435:5432"
+
+  admin_panel_django:
+    ports:
+      - "8000:8000"
+
+  admin_panel_nginx:
+    ports:
+      - "80:80"
+
+  ### service auth ###
+  auth_api:
+    ports:
+      - 8001:8000
+    command: uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+
+  auth_postgres:
     ports:
       - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - .env
-    healthcheck:
-        test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -p ${POSTGRES_PORT}" ]
-        interval: 5s
-        timeout: 5s
-        retries: 5
-    networks:
-      - default
-    container_name: 'middle_practicum_auth_postgres'
 
-  redis:
-    image: redis:7.2.5
-    healthcheck:
-      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
-      interval: 10s
-    env_file:
-      - .env
+  auth_redis:
     ports:
       - 6380:6379
-    networks:
-      - default
-    container_name: 'middle_practicum_auth_redis'
 
-  nginx:
-    entrypoint: [ "echo", "Service nginx disabled in dev mode" ]
+  auth_nginx:
+    ports:
+      - "81:80"
 
+  ### service content ###
+  content_api:
+    ports:
+      - "8002:8000"
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
-volumes:
-  postgres_data:
-  redis_data:
+  content_redis:
+    ports:
+      - "6382:6379"
 
-networks:
-  default:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.16.57.0/24
+  content_elasticsearch:
+    ports:
+      - "9200:9200"
+
+  content_nginx:
+    ports:
+      - "82:80"
