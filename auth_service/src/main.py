@@ -13,7 +13,7 @@ from redis.asyncio import Redis
 from starlette.responses import JSONResponse
 
 from api.v1.routers import main_router
-from src.helperes.jaeger import configure_tracer
+from helperes.jaeger import configure_tracer
 from core.config import app_settings
 from core.logger import LOGGING
 from models.entity import add_default_roles
@@ -56,14 +56,14 @@ app = FastAPI(
 
 @app.middleware("http")
 async def before_request(request: Request, call_next):
-    request_id = request.headers.get("X-Request-Id")
+    request_id = request.headers.get('X-Request-Id')
     if not request_id:
         return ORJSONResponse(
             status_code=HTTPStatus.BAD_REQUEST,
-            content={"detail": "X-Request-Id is required"},
+            content={'detail': 'X-Request-Id is required'},
         )
-    with tracer.start_as_current_span("auth_request") as span:
-        span.set_attribute("http.request_id", request_id)
+    with tracer.start_as_current_span('auth_request') as span:
+        span.set_attribute('http.request_id', request_id)
         response = await call_next(request)
         return response
 
