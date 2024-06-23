@@ -3,13 +3,13 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.v1.serializers.role_serializer import RoleSerializer, RoleCreateSerializer, AssignRoleSerializer
+from api.v1.serializers.role_serializer import RoleSerializer, RoleCreateSerializer, AssignRoleSerializer
 from db.postgres import get_session
-from src.helperes.auth import roles_required
-from src.helperes.auth_request import AuthRequest
+from helperes.auth import roles_required
+from helperes.auth_request import AuthRequest
 from models.entity import Roles
-from src.services.role_servece import RoleService, get_role_service
-from src.services.user_service import UserService, get_user_service
+from services.role_servece import RoleService, get_role_service
+from services.user_service import UserService, get_user_service
 
 router = APIRouter()
 

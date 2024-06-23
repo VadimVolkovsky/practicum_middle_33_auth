@@ -4,7 +4,7 @@ from http import HTTPStatus
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.crud.base import CRUDBase
+from crud.base import CRUDBase
 from models.entity import Role, User, Roles
 
 

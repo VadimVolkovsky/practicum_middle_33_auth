@@ -1,16 +1,17 @@
 import random
 from datetime import datetime
 from http import HTTPStatus
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from api.v1.paginate_params import PaginatedParams, get_paginated_params
 from constants import ListDictType, OptStrType
 from db.elastic import Indexes
 from services.film import FilmService, get_film_service
+from services.jwt_service import security_jwt
 from services.utils import validation_index_model_field
-from api.v1.paginate_params import PaginatedParams, get_paginated_params
-
 
 router = APIRouter()
 
@@ -110,13 +111,16 @@ async def film_details(film_id: str, film_service: FilmService = Depends(get_fil
                 В случае отсутствия подходяших фильмов - возвращает код ответа 404
                 """
             )
-async def film_list(paginated: PaginatedParams = Depends(get_paginated_params),
-                    sort: OptStrType = None,
-                    genre: OptStrType = None,
-                    film_service: FilmService = Depends(get_film_service)) -> list[FilmListSerializer]:
+async def film_list(
+        auth_user: Annotated[dict, Depends(security_jwt)],
+        paginated: PaginatedParams = Depends(get_paginated_params),
+        sort: OptStrType = None,
+        genre: OptStrType = None,
+        film_service: FilmService = Depends(get_film_service)) -> list[FilmListSerializer]:
     """
     Метод возвращает сериализованный список фильмов, с опциональной фильтрацией по жанру.
     В случае отсутствия подходяших фильмов - возвращает код ответа 404
+    :param auth_user: обязательная авторизация для доступа к эндпоинту
     :param page_number: номер страницы
     :param page_size: размер станицы
     :param sort: поле, по которому ссортируется список

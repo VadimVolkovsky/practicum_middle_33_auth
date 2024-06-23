@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.crud.base import CRUDBase
+from .base import CRUDBase
 from models.entity import User
 
 
