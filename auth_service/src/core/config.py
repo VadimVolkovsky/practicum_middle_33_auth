@@ -18,7 +18,7 @@ class AuthBaseSettings(BaseSettings):
 
 class JaegerSettings(AuthBaseSettings):
     jaeger_host: str = Field(
-        default='auth_jaeger',
+        default='jaeger_service',
     )
     jaeger_port: int = Field(
         default=6831,
