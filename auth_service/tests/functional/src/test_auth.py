@@ -112,6 +112,3 @@ async def test_change_user_data(user_authenticated_client):
 
     assert status == HTTPStatus.OK
     assert response_body['detail'] == "Data were updated successfully"
-
-
-

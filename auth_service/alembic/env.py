@@ -10,7 +10,6 @@ from alembic import context
 
 from src.core.config import app_settings
 from src.db.postgres import Base
-from src.models.entity import User, Role, UserLoginHistory
 
 load_dotenv('.env')
 

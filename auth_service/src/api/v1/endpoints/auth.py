@@ -3,7 +3,8 @@ from http import HTTPStatus
 
 from async_fastapi_jwt_auth import AuthJWT
 from async_fastapi_jwt_auth.auth_jwt import AuthJWTBearer
-from core.schemas.entity import UserInDB, AdminInDB, UserCreate, UserLogin, JWTResponse, UserUpdate, UserLoginHistoryInDB
+from core.schemas.entity import (UserInDB, AdminInDB, UserCreate, UserLogin, JWTResponse, UserUpdate,
+                                 UserLoginHistoryInDB)
 from db.postgres import get_session
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, paginate
@@ -100,7 +101,6 @@ async def login_admin(
     )
 
 
-
 @router.post('/check_token', status_code=HTTPStatus.OK)
 async def check_token(
         user_service: UserService = Depends(get_user_service),
@@ -180,4 +180,3 @@ async def get_user_login_history(
     user = await user_service.get_user_by_email(email, session)
     user_login_history = await user_service.get_user_login_history(user, session)
     return paginate(user_login_history)
-
