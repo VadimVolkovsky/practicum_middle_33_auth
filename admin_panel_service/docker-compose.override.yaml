@@ -1,13 +1,13 @@
 version: '3'
 services:
 
-  admin_panel_postgres:
-    ports:
-      - "5435:5435"
-
   admin_panel_django:
     ports:
       - "8000:8000"
+
+  admin_panel_postgres:
+    ports:
+      - "5435:5432"
 
   admin_panel_nginx:
     entrypoint: [ "echo", "Service nginx disabled in dev mode" ]

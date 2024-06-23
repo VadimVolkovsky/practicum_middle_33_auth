@@ -8,10 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from werkzeug.security import generate_password_hash
 
 from core.schemas.entity import UserCreate, UserUpdate, UserLoginHistory, UserLoginHistoryInDB, UserInDB
-from src.crud.user import user_crud
-from src.crud.user_history import user_login_history_crud
+from crud.user import user_crud
+from crud.user_history import user_login_history_crud
 from models.entity import User
-from src.services.redis import get_redis
+from services.redis import get_redis
 
 
 class UserService:

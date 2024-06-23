@@ -2,8 +2,8 @@ import typer
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from src.core.config import app_settings
-from src.models.entity import User, Role
+from core.config import app_settings
+from models.entity import User, Role
 
 Base = declarative_base()
 dsn = (f'postgresql+psycopg2://{app_settings.postgres_user}:{app_settings.postgres_password}@'
@@ -22,7 +22,7 @@ def create_superuser():
         email='admin@mail.ru',
         first_name='admin',
         last_name='god',
-        password='admin_password',
+        password='admin',
         role=admin_role
     )
 
@@ -32,7 +32,7 @@ def create_superuser():
 
     print('superuser created:')
     print(f'email: {user_obj.email}')
-    print(f'password: admin_password')
+    print(f'password: admin')
 
 
 if __name__ == "__main__":

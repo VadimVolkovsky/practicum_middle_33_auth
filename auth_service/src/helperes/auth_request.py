@@ -1,6 +1,6 @@
 from fastapi import Request
 
-from src.api.v1.serializers.role_serializer import AssignRoleSerializer
+from api.v1.serializers.role_serializer import AssignRoleSerializer
 
 
 class AuthRequest(Request):

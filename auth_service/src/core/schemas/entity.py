@@ -35,6 +35,16 @@ class UserInDB(BaseModel):
         from_attributes = True
 
 
+class AdminInDB(UserInDB):
+    """AdminInDB — это то, что мы будем отдавать для входа в админку — детальную информацию по нужным полям модели. """
+    email: EmailStr
+    role: str
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+
 class UserLoginHistory(BaseModel):
     user_id: UUID
 

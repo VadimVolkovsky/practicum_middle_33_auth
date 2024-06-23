@@ -7,7 +7,7 @@ from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from src.db.postgres import get_session, Base
+from db.postgres import get_session, Base
 
 
 class Roles(Enum):

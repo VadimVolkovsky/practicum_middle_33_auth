@@ -3,15 +3,15 @@ from http import HTTPStatus
 
 from async_fastapi_jwt_auth import AuthJWT
 from async_fastapi_jwt_auth.auth_jwt import AuthJWTBearer
-from core.schemas.entity import UserInDB, UserCreate, UserLogin, JWTResponse, UserUpdate, UserLoginHistoryInDB
+from core.schemas.entity import UserInDB, AdminInDB, UserCreate, UserLogin, JWTResponse, UserUpdate, UserLoginHistoryInDB
 from db.postgres import get_session
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, paginate
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.config import AppSettings, app_settings
-from src.services import redis
-from src.services.user_service import get_user_service, UserService
+from services import redis
+from services.user_service import get_user_service, UserService
 
 router = APIRouter()
 auth_dep = AuthJWTBearer()
@@ -50,7 +50,7 @@ async def login(
 ):
     """
     Эндпоинт авторизации пользователя по логину и паролю.
-    В случае усешной авторизации создаются access и refresh токены
+    В случае успешной авторизации создаются access и refresh токены
     """
     if not await user_service.check_user_credentials(user.email, user.password, session):
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Bad email or password")
@@ -64,6 +64,41 @@ async def login(
     )
     await user_service.add_user_login_history(user.email, session)
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)
+
+
+@router.post('/login_admin', response_model=AdminInDB, status_code=HTTPStatus.OK)
+async def login_admin(
+        user: UserLogin,
+        user_service: UserService = Depends(get_user_service),
+        authorize: AuthJWT = Depends(auth_dep),
+        session: AsyncSession = Depends(get_session)
+):
+    """
+    Эндпоинт входа в админку по логину и паролю.
+    В случае успешной авторизации возвращаются данные пользователя
+    """
+    if not await user_service.check_user_credentials(user.email, user.password, session):
+        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Bad email or password")
+    # access_token = await authorize.create_access_token(subject=user.email)
+    # raw_jwt = await authorize.get_raw_jwt(encoded_token=access_token)
+    # access_token_jti = raw_jwt['jti']
+
+    # refresh_token = await authorize.create_refresh_token(
+    #     subject=user.email,
+    #     user_claims={'access_token_jti': access_token_jti}
+    # )
+    user_from_db = await user_service.get_user_by_email(user.email, session)
+    if user_from_db.role.name != 'admin':
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='Only admin can access this URL')
+    await user_service.add_user_login_history(user.email, session)
+    return AdminInDB(
+        id=user_from_db.id,
+        first_name=user_from_db.first_name,
+        last_name=user_from_db.last_name,
+        email=user_from_db.email,
+        role=user_from_db.role.name,
+    )
+
 
 
 @router.post('/check_token', status_code=HTTPStatus.OK)

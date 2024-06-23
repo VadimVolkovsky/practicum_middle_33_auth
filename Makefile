@@ -33,14 +33,14 @@ flake8:
 test:
 	$(EXEC_CORE) pytest
 
-makemigrations:
+makemigrations_auth:
 	$(EXEC_CORE) alembic revision --autogenerate
 
-migrate:
+migrate_auth:
 	$(EXEC_CORE) alembic upgrade head
 
-roles:
-	$(EXEC_CORE) python create_roles.py
+roles_auth:
+	$(EXEC_CORE) python src/create_roles.py
 
-superuser:
-	$(EXEC_CORE) python superuser.py
+superuser_auth:
+	$(EXEC_CORE) python src/superuser.py

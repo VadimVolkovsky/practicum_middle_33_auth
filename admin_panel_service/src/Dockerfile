@@ -1,14 +1,9 @@
-FROM python:3.10
+FROM python:3.12
 
-#WORKDIR /opt/app
 RUN mkdir /app
 
 ENV DJANGO_SETTINGS_MODULE 'config.settings'
-#ENV DJANGO_SETTINGS_MODULE 'src.config.settings'
 ENV PYTHONPATH /app
-#ENV PYTHONPATH /app/src
-#ENV PYTHONDONTWRITEBYTECODE 1
-#ENV PYTHONUNBUFFERED 1
 
 COPY .env /app/.env
 COPY requirements.txt app/requirements.txt

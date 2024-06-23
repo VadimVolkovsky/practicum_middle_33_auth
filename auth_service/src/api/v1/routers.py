@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
-from src.api.v1.endpoints import auth_router, role_router
-from src.helperes.auth import get_current_user_global
+from api.v1.endpoints import auth_router, role_router
+from helperes.auth import get_current_user_global
 
 main_router = APIRouter()
 
