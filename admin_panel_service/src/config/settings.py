@@ -38,6 +38,14 @@ ROOT_URLCONF = 'config.urls'
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+AUTH_USER_MODEL = "users.User"
+
+AUTHENTICATION_BACKENDS = [
+    'users.auth.CustomBackend',
+    # 'django.contrib.auth.backends.ModelBackend',
+]
+
+AUTH_ADMIN_LOGIN_URL = os.environ.get('AUTH_ADMIN_LOGIN_URL', default='http://localhost:8001/api/v1/auth/login_admin')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

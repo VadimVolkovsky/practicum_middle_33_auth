@@ -6,11 +6,11 @@ from fastapi import Depends, Request
 from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.v1.serializers.role_serializer import AssignRoleSerializer, RoleCreateSerializer
+from api.v1.serializers.role_serializer import AssignRoleSerializer, RoleCreateSerializer
 from db.postgres import get_session
-from src.helperes.auth_request import AuthRequest
-from src.helperes.exceptions import AuthException
-from src.services.user_service import get_user_service, UserService
+from helperes.auth_request import AuthRequest
+from helperes.exceptions import AuthException
+from services.user_service import get_user_service, UserService
 
 
 def roles_required(roles_list: list[RoleCreateSerializer]):

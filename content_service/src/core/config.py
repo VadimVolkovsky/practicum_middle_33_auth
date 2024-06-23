@@ -18,15 +18,23 @@ class AppSettings(BaseSettings):
     # Настройки для запуска приложения в контейнерах
     project_name: str = 'movies'
     redis_host: str = Field(default='content_redis')
-    redis_port: int = Field(default=6382)
+    redis_port: int = Field(default=6379)
     elastic_host: str = Field(default='content_elasticsearch')
     elastic_port: int = Field(default=9200)
+    auth_service_host: str = Field(default='auth_nginx')
+    auth_service_port: int = Field(default=80)
 
     # Настройки для локального дебага приложения (без контейнера)
     # redis_host: str = Field(default='127.0.0.1')
     # redis_port: int = Field(default=6379)
     # elastic_host: str = Field(default='127.0.0.1')
     # elastic_port: int = Field(default=9200)
+    # auth_service_host: str = Field(default='127.0.0.1')
+    # auth_service_port: int = Field(default=8000)
+
+    @property
+    def auth_check_token_url(self):
+        return f'http://{self.auth_service_host}:{self.auth_service_port}/api/v1/auth/check_token'
 
     class Config:
         env_file = '.env'

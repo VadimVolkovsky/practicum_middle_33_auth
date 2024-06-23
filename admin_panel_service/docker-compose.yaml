@@ -1,5 +1,18 @@
 version: '3'
 services:
+  admin_panel_django:
+    build: ./src
+    ports:
+      - "0:8000"
+    depends_on:
+      - admin_panel_postgres
+    networks:
+      - admin_panel_network
+    volumes:
+      - static_value:/opt/app/static/
+      - media_value:/opt/app/media/
+    container_name: admin_panel_django
+
 
   admin_panel_postgres:
     image: postgres:16.0
@@ -13,18 +26,6 @@ services:
     networks:
       - admin_panel_network
 
-  admin_panel_django:
-    build: ./src
-    ports:
-      - "0:8000"
-    depends_on:
-      - admin_panel_postgres
-    networks:
-      - admin_panel_network
-    volumes:
-      - static_value:/opt/app/static/
-      - media_value:/opt/app/media/
-    container_name: admin_panel_django
 
   admin_panel_nginx:
     image: nginx:1.19.2

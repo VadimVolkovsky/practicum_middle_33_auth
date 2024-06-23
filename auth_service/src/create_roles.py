@@ -1,8 +1,8 @@
 import asyncio
 import contextlib
 
-from src.db.postgres import get_session
-from src.models.entity import Roles, Role
+from db.postgres import get_session
+from models.entity import Roles, Role
 
 # получение DI через контекстный менеджер
 get_async_session_context = contextlib.asynccontextmanager(get_session)
