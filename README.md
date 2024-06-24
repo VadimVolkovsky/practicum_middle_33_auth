@@ -33,3 +33,9 @@ make roles_auth
 ```shell
 make superuser_auth
 ```
+
+
+Сервис Jaeger WEB GUI (трассировка запрсов)
+```
+http://0.0.0.0:16686/search
+```
