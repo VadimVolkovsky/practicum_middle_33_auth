@@ -5,7 +5,7 @@ services:
     image: content_api_image
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: Dockerfile
     restart: always
     volumes:
       - .:/app
@@ -70,7 +70,6 @@ services:
     networks:
       - content_network
     container_name: 'content_nginx'
-
 
 volumes:
   esdata01:

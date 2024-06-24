@@ -2,3 +2,14 @@ include:
   - admin_panel_service/docker-compose.yaml
   - auth_service/docker-compose.yaml
   - content_service/docker-compose.yaml
+
+services:
+  jaeger_service:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger_service
+    ports:
+      - '0:6831/udp'
+      - '16686:16686'
+    networks:
+      - auth_network
+      - content_network
