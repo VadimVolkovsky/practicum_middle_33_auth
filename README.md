@@ -35,7 +35,7 @@ make superuser_auth
 ```
 
 
-Сервис Jaeger WEB GUI (трассировка запрсов)
+Сервис Jaeger WEB GUI (трассировка запросов)
 ```
 http://0.0.0.0:16686/search
 ```
