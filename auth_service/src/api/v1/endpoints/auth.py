@@ -70,7 +70,7 @@ async def login(
         subject=user.email,
         user_claims={'access_token_jti': access_token_jti}
     )
-    await user_service.add_user_login_history(user.email, session)
+    await user_service.add_user_login_history(user.email, 'admin', session)
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)
 
 
@@ -98,7 +98,7 @@ async def login_admin(
     user_from_db = await user_service.get_user_by_email(user.email, session)
     if user_from_db.role.name != 'admin':
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='Only admin can access this URL')
-    await user_service.add_user_login_history(user.email, session)
+    await user_service.add_user_login_history(user.email, 'site', session)
     return AdminInDB(
         id=user_from_db.id,
         first_name=user_from_db.first_name,
@@ -243,5 +243,5 @@ async def google_auth(
         subject=user_from_db.email,
         user_claims={'access_token_jti': access_token_jti}
     )
-    await user_service.add_user_login_history(user_from_db.email, session)
+    await user_service.add_user_login_history(user_from_db.email, 'social', session)
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)

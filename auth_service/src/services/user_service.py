@@ -63,11 +63,12 @@ class UserService:
     async def add_user_login_history(
             self,
             email: str,
+            user_auth_service: str,
             session: AsyncSession
     ) -> None:
         """Метод для сохранения истории входов пользователя"""
         user_data = await user_crud.get_by_attribute('email', email, session)
-        obj_in = UserLoginHistory(user_id=user_data.id)
+        obj_in = UserLoginHistory(user_id=user_data.id, user_auth_service=user_auth_service)
         await user_login_history_crud.create(obj_in, session)
 
     async def get_user_login_history(self, user: User, session: AsyncSession) -> list[UserLoginHistoryInDB]:
