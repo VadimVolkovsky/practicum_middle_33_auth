@@ -1,15 +1,23 @@
 import datetime
+import secrets
 from http import HTTPStatus
 
 from async_fastapi_jwt_auth import AuthJWT
 from async_fastapi_jwt_auth.auth_jwt import AuthJWTBearer
-from core.schemas.entity import UserInDB, AdminInDB, UserCreate, UserLogin, JWTResponse, UserUpdate, UserLoginHistoryInDB
+from authlib.integrations.base_client.errors import OAuthError
+from core.schemas.entity import UserInDB, AdminInDB, UserCreate, UserLogin, JWTResponse, UserUpdate, \
+    UserLoginHistoryInDB
+from core.schemas.entity import (UserInDB, AdminInDB, UserCreate, UserLogin, JWTResponse, UserUpdate,
+                                 UserLoginHistoryInDB)
 from db.postgres import get_session
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, paginate
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.requests import Request
 
 from core.config import AppSettings, app_settings
+from db.postgres import get_session
+from helperes.google_auth import oauth
 from services import redis
 from services.user_service import get_user_service, UserService
 
@@ -100,7 +108,6 @@ async def login_admin(
     )
 
 
-
 @router.post('/check_token', status_code=HTTPStatus.OK)
 async def check_token(
         user_service: UserService = Depends(get_user_service),
@@ -181,3 +188,60 @@ async def get_user_login_history(
     user_login_history = await user_service.get_user_login_history(user, session)
     return paginate(user_login_history)
 
+
+@router.get("/login_google")
+async def login_google(
+        request: Request,
+
+):
+    """Эндпоинт для авторизации через Google"""
+    redirect_url = app_settings.redirect_url
+    return await oauth.google.authorize_redirect(request, redirect_url)
+
+
+@router.get("/google_auth", response_model=JWTResponse, status_code=HTTPStatus.OK)
+async def google_auth(
+        request: Request,
+        authorize: AuthJWT = Depends(auth_dep),
+        user_service: UserService = Depends(get_user_service),
+        session: AsyncSession = Depends(get_session),
+
+):
+    """Redirect URL для авторизации через Google"""
+    try:
+        token = await oauth.google.authorize_access_token(request)
+    except OAuthError as error:
+        raise Exception(error)
+    user = token.get('userinfo')
+    if user:
+        request.session['user'] = dict(user)
+
+    try:
+        # если юзер с такой почтой уже есть в БД - логиним его в эту учетку.
+        # (в след спринтах будет подтверждение входа паролем или отправка письма на почту)
+        user_from_db = await user_service.get_user_by_email(user.email, session)
+    except HTTPException:
+        # если юзера в БД нет, создаем нового юзера с рандомным паролем.
+        # Юзер сможет сменить рандомный пароль  через "восстановление пароля" в след спринтах,
+        # Либо продолжить логиниться через google.
+        password_length = 13
+        random_password = secrets.token_urlsafe(password_length)
+        user_create_scheme = UserCreate(
+            email=user.email,
+            password=random_password,
+            first_name=user.given_name,
+            last_name=user.family_name,
+        )
+        user_from_db = await user_service.create_user(user_create_scheme, session)
+
+    # выдаем юзеру акссес и рефреш токены
+    access_token = await authorize.create_access_token(subject=user_from_db.email)
+    raw_jwt = await authorize.get_raw_jwt(encoded_token=access_token)
+    access_token_jti = raw_jwt['jti']
+
+    refresh_token = await authorize.create_refresh_token(
+        subject=user_from_db.email,
+        user_claims={'access_token_jti': access_token_jti}
+    )
+    await user_service.add_user_login_history(user_from_db.email, session)
+    return JWTResponse(access_token=access_token, refresh_token=refresh_token)

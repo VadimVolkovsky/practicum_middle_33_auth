@@ -1,20 +1,34 @@
 import logging
 from contextlib import asynccontextmanager
+from http import HTTPStatus
 
 import uvicorn
 from elasticsearch import AsyncElasticsearch
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import ORJSONResponse
+from opentelemetry import trace
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from redis.asyncio import Redis
 
+from helpers.jaeger import configure_tracer
 from core.config import app_settings
 from core.logger import LOGGING
 from db import redis, elastic
 from api.v1.routers import main_router
 
 
+tracer = trace.get_tracer(__name__)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if app_settings.jaeger.enable_tracer:
+        configure_tracer(
+            app_settings.jaeger.jaeger_host,
+            app_settings.jaeger.jaeger_port,
+            app_settings.project_name,
+        )
+
     redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
     elastic.es = AsyncElasticsearch(hosts=[f'{app_settings.elastic_host}:{app_settings.elastic_port}'])
     yield
@@ -31,6 +45,21 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
     lifespan=lifespan
 )
+
+@app.middleware("http")
+async def before_request(request: Request, call_next):
+    request_id = request.headers.get('X-Request-Id')
+    if not request_id:
+        return ORJSONResponse(
+            status_code=HTTPStatus.BAD_REQUEST,
+            content={'detail': 'X-Request-Id is required'},
+        )
+    with tracer.start_as_current_span('content_request') as span:
+        span.set_attribute('http.request_id', request_id)
+        response = await call_next(request)
+        return response
+
+FastAPIInstrumentor.instrument_app(app)
 
 app.include_router(main_router, prefix='/api/v1')
 

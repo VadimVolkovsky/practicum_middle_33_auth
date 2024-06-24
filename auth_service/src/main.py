@@ -1,19 +1,26 @@
 import logging
 from contextlib import asynccontextmanager
+from http import HTTPStatus
 
 import uvicorn
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi import FastAPI, Request
 from fastapi.responses import ORJSONResponse
 from fastapi_pagination import add_pagination
+from opentelemetry import trace
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from redis.asyncio import Redis
+from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import JSONResponse
 
 from api.v1.routers import main_router
+from helperes.jaeger import configure_tracer
 from core.config import app_settings
 from core.logger import LOGGING
-from models.entity import add_default_roles
 from services import redis
+
+
+tracer = trace.get_tracer(__name__)
 
 
 @asynccontextmanager
@@ -23,6 +30,13 @@ async def lifespan(app: FastAPI):
         # await create_database()  # TODO использовать алембик
         # await add_default_roles()
         pass
+
+    if app_settings.jaeger.enable_tracer:
+        configure_tracer(
+            app_settings.jaeger.jaeger_host,
+            app_settings.jaeger.jaeger_port,
+            app_settings.project_name,
+        )
 
     redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
     yield
@@ -40,8 +54,26 @@ app = FastAPI(
 )
 
 
+@app.middleware("http")
+async def before_request(request: Request, call_next):
+    request_id = request.headers.get('X-Request-Id')
+    if not request_id:
+        return ORJSONResponse(
+            status_code=HTTPStatus.BAD_REQUEST,
+            content={'detail': 'X-Request-Id is required'},
+        )
+    with tracer.start_as_current_span('auth_request') as span:
+        span.set_attribute('http.request_id', request_id)
+        response = await call_next(request)
+        return response
+
+FastAPIInstrumentor.instrument_app(app)
+
 app.include_router(main_router, prefix='/api/v1')
 add_pagination(app)
+
+# Google OAuth 2.0 settings
+app.add_middleware(SessionMiddleware, secret_key="some-random-string123")
 
 
 # TODO подумать куда вынести

@@ -11,7 +11,8 @@ from http import HTTPStatus
 async def admin_authenticated_client(api_session, admin_user, redis_client):
     """Сессия авторизованного админа"""
     login_data = {'email': admin_user.email, 'password': 'test_password'}
-    response = await api_session.post(f'http://{test_settings.service_host}:{test_settings.service_port}/api/v1/auth/login', json=login_data)
+    response = await api_session.post(f'http://{test_settings.service_host}:{test_settings.service_port}'
+                                      f'/api/v1/auth/login', json=login_data)
     assert response.status_code == HTTPStatus.OK
     access_token = json.loads(response.content.decode())['access_token']
     # refresh_token = json.loads(response.content.decode())['refresh_token']
@@ -25,7 +26,8 @@ async def admin_authenticated_client(api_session, admin_user, redis_client):
 async def user_authenticated_client(api_session, default_user, redis_client):
     """Сессия авторизованного пользователя"""
     login_data = {'email': default_user.email, 'password': 'test_password'}
-    response = await api_session.post(f'http://{test_settings.service_host}:{test_settings.service_port}/api/v1/auth/login', json=login_data)
+    response = await api_session.post(f'http://{test_settings.service_host}:{test_settings.service_port}'
+                                      f'/api/v1/auth/login', json=login_data)
     assert response.status_code == HTTPStatus.OK
     access_token = json.loads(response.content.decode())['access_token']
     refresh_token = json.loads(response.content.decode())['refresh_token']
@@ -83,6 +85,6 @@ async def default_user(db_session, roles):
 async def authenticated_user(default_user, post_request):
     """Возвращает access и refresh токены авторизованного пользователя"""
     login_data = {'email': default_user.email, 'password': 'test_password'}
-    response = await post_request(f'http://127.0.0.1:8000/api/v1/auth/login', data=login_data)
+    response = await post_request('http://127.0.0.1:8000/api/v1/auth/login', data=login_data)
     tokens = response.body
     yield tokens

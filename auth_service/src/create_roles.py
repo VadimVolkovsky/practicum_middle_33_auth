@@ -18,6 +18,5 @@ async def add_default_roles():
             print(f'Добавлена роль {role.value}')
 
 
-
 if __name__ == '__main__':
     asyncio.run(add_default_roles())

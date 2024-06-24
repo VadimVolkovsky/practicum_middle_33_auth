@@ -32,7 +32,7 @@ def create_superuser():
 
     print('superuser created:')
     print(f'email: {user_obj.email}')
-    print(f'password: admin')
+    print('password: admin')
 
 
 if __name__ == "__main__":
