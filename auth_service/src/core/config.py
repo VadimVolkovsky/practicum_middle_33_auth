@@ -49,6 +49,11 @@ class AppSettings(AuthBaseSettings):
     access_expires: int = 3600
     refresh_expires: int = 86400
 
+    # google OAuth 2.0 settings
+    redirect_url: str
+    client_id: str
+    client_secret: str
+
     debug: bool = Field(default='False')
 
     jaeger: JaegerSettings = JaegerSettings()
