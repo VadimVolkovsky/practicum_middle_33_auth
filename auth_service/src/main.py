@@ -7,12 +7,12 @@ from fastapi import FastAPI, Request
 from fastapi.responses import ORJSONResponse
 from fastapi_pagination import add_pagination
 from redis.asyncio import Redis
+from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import JSONResponse
 
 from api.v1.routers import main_router
 from core.config import app_settings
 from core.logger import LOGGING
-from models.entity import add_default_roles
 from services import redis
 
 
@@ -42,6 +42,9 @@ app = FastAPI(
 
 app.include_router(main_router, prefix='/api/v1')
 add_pagination(app)
+
+# Google OAuth 2.0 settings
+app.add_middleware(SessionMiddleware, secret_key="some-random-string123")
 
 
 # TODO подумать куда вынести
