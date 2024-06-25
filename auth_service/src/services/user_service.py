@@ -87,7 +87,6 @@ class UserService:
             authorize: AuthJWT
     ):
         """Создание access и refresh токенов"""
-        # выдаем юзеру акссес и рефреш токены
         access_token = await authorize.create_access_token(subject=user.email)
         raw_jwt = await authorize.get_raw_jwt(encoded_token=access_token)
         access_token_jti = raw_jwt['jti']
@@ -101,7 +100,7 @@ class UserService:
     async def login_user_with_social_network(
             self,
             session: AsyncSession,
-            user: UserInfo,  # TODO посомтреть тип данных
+            user: UserInfo,
             authorize: AuthJWT,
     ) -> JWTResponse:
         """Авторизация юзера через социальные сети и выдача ему токенов"""
