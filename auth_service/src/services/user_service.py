@@ -1,13 +1,17 @@
+import secrets
 from functools import lru_cache
 from http import HTTPStatus
 
+from async_fastapi_jwt_auth import AuthJWT
+from authlib.oidc.core import UserInfo
+
+from core.schemas.entity import UserCreate, UserUpdate, UserLoginHistory, UserLoginHistoryInDB, UserInDB, JWTResponse
 from fastapi import Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from werkzeug.security import generate_password_hash
 
-from core.schemas.entity import UserCreate, UserUpdate, UserLoginHistory, UserLoginHistoryInDB, UserInDB
 from crud.user import user_crud
 from crud.user_history import user_login_history_crud
 from models.entity import User
@@ -76,6 +80,53 @@ class UserService:
         """
         user_login_history = await user_login_history_crud.get_user_login_history(user, session)
         return user_login_history
+
+    async def create_jwt_tokens(
+            self,
+            user: User,
+            authorize: AuthJWT
+    ):
+        """Создание access и refresh токенов"""
+        # выдаем юзеру акссес и рефреш токены
+        access_token = await authorize.create_access_token(subject=user.email)
+        raw_jwt = await authorize.get_raw_jwt(encoded_token=access_token)
+        access_token_jti = raw_jwt['jti']
+
+        refresh_token = await authorize.create_refresh_token(
+            subject=user.email,
+            user_claims={'access_token_jti': access_token_jti}
+        )
+        return JWTResponse(access_token=access_token, refresh_token=refresh_token)
+
+    async def login_user_with_social_network(
+            self,
+            session: AsyncSession,
+            user: UserInfo,  # TODO посомтреть тип данных
+            authorize: AuthJWT,
+    ) -> JWTResponse:
+        """Авторизация юзера через социальные сети и выдача ему токенов"""
+        try:
+            # если юзер с такой почтой уже есть в БД - логиним его в эту учетку.
+            # (в след спринтах будет подтверждение входа паролем или отправка письма на почту)
+            user_from_db = await self.get_user_by_email(user.email, session)
+        except HTTPException:
+            # если юзера в БД нет, создаем нового юзера с рандомным паролем.
+            # Юзер сможет сменить рандомный пароль  через "восстановление пароля" в след спринтах,
+            # Либо продолжить логиниться через google.
+            password_length = 13
+            random_password = secrets.token_urlsafe(password_length)
+            if not user.email:  # если мы не получили данные о email - генерим рандомный и уведомляем юзера на фронте
+                user.email = f'{secrets.token_hex(10)}@mail.ru'
+            user_create_scheme = UserCreate(
+                email=user.email,
+                password=random_password,
+                first_name=user.given_name,
+                last_name=user.family_name,
+            )
+            user_from_db = await self.create_user(user_create_scheme, session)
+
+        await self.add_user_login_history(user_from_db.email, session)
+        return await self.create_jwt_tokens(user_from_db, authorize)
 
 
 @lru_cache()
