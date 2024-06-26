@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_limiter.depends import RateLimiter
 from pydantic import BaseModel, Field
 
 from db.elastic import Indexes
@@ -35,6 +36,7 @@ class PersonFilmsSerializer(BaseModel):
 
 
 @router.get('/search', response_model=list[PersonSerializer],
+            dependencies=[Depends(RateLimiter(times=2, seconds=5))],
             description="""Выполните запрос на поиск персонажа по имени, где:
             query: строка, по которой производится полнотекстовый поиск
             page_number: номер страницы
@@ -71,6 +73,7 @@ async def persons_search(query: str,
 
 
 @router.get('/{person_id}', response_model=PersonSerializer,
+            dependencies=[Depends(RateLimiter(times=2, seconds=5))],
             description="""Выполните запрос на поиск персонажа по его id,
             в ответе будет выведен подробная информация о персонаже, со списком его фильмов и ролей""")
 async def person_detail(
@@ -92,6 +95,7 @@ async def person_detail(
 
 
 @router.get('/{person_id}/film', response_model=list[PersonFilmsSerializer],
+            dependencies=[Depends(RateLimiter(times=2, seconds=5))],
             description="""Выполните запрос на поиск персонажа по его id,
             в ответе будет выведен информация о фильмах, в которых принял участие персонаж""")
 async def person_films_detail(

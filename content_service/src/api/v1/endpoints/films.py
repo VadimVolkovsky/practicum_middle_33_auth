@@ -4,6 +4,7 @@ from http import HTTPStatus
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_limiter.depends import RateLimiter
 from pydantic import BaseModel
 
 from api.v1.paginate_params import PaginatedParams, get_paginated_params
@@ -39,6 +40,7 @@ class FilmSerializer(FilmListSerializer):
 
 @router.get('/search',
             response_model=list[FilmListSerializer],
+            dependencies=[Depends(RateLimiter(times=2, seconds=5))],
             description="""Выполните запрос на поиск фильмов по названию, где:
     query - строка, по которой производится полнотекстовый поиск
     page_number - номер страницы
@@ -72,6 +74,7 @@ async def film_search(query: str,
 
 @router.get('/{film_id}',
             response_model=FilmSerializer,
+            dependencies=[Depends(RateLimiter(times=2, seconds=5))],
             description="""Выполните запрос на поиск фильма по его id,
             в ответе будет выведен подробная информация о фильме""")
 async def film_details(film_id: str, film_service: FilmService = Depends(get_film_service)) -> FilmSerializer:
@@ -102,6 +105,7 @@ async def film_details(film_id: str, film_service: FilmService = Depends(get_fil
 
 
 @router.get('', response_model=list[FilmListSerializer],
+            dependencies=[Depends(RateLimiter(times=2, seconds=5))],
             description="""Выполните запрос на поиск фильмов, где:
                 query - строка, по которой производится полнотекстовый поиск
                 page_number: номер страницы

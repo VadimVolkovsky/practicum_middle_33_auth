@@ -11,6 +11,7 @@ from core.schemas.entity import (UserInDB, AdminInDB, UserCreate, UserLogin, JWT
                                  UserLoginHistoryInDB)
 from db.postgres import get_session
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_limiter.depends import RateLimiter
 from fastapi_pagination import Page, paginate
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
@@ -39,7 +40,8 @@ async def check_if_token_in_denylist(decrypted_token):
     return entry and entry == 'true'
 
 
-@router.post('/signup', response_model=UserInDB, status_code=HTTPStatus.CREATED)
+@router.post('/signup', response_model=UserInDB, status_code=HTTPStatus.CREATED,
+             dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 async def create_user(
         user_create: UserCreate,
         user_service: UserService = Depends(get_user_service),
@@ -49,7 +51,8 @@ async def create_user(
     return await user_service.create_user(user_create, session)
 
 
-@router.post('/login', response_model=JWTResponse, status_code=HTTPStatus.OK)
+@router.post('/login', response_model=JWTResponse, status_code=HTTPStatus.OK,
+             dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 async def login(
         user: UserLogin,
         user_service: UserService = Depends(get_user_service),
@@ -74,7 +77,8 @@ async def login(
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)
 
 
-@router.post('/login_admin', response_model=AdminInDB, status_code=HTTPStatus.OK)
+@router.post('/login_admin', response_model=AdminInDB, status_code=HTTPStatus.OK,
+             dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 async def login_admin(
         user: UserLogin,
         user_service: UserService = Depends(get_user_service),
@@ -108,7 +112,7 @@ async def login_admin(
     )
 
 
-@router.post('/check_token', status_code=HTTPStatus.OK)
+@router.post('/check_token', status_code=HTTPStatus.OK, dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 async def check_token(
         user_service: UserService = Depends(get_user_service),
         authorize: AuthJWT = Depends(auth_dep),
@@ -131,7 +135,7 @@ async def check_token(
     return {'email': user.email, 'role': user.role.name}
 
 
-@router.delete('/logout', status_code=HTTPStatus.OK)
+@router.delete('/logout', status_code=HTTPStatus.OK, dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 async def logout(
         user_service: UserService = Depends(get_user_service),
         authorize: AuthJWT = Depends(auth_dep),
@@ -146,7 +150,7 @@ async def logout(
     return {"detail": "Logged out successfully"}
 
 
-@router.post('/refresh')
+@router.post('/refresh', dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 async def refresh(authorize: AuthJWT = Depends(auth_dep)):
     """
     Эндпоинт получения нового access токена по refresh токену.
@@ -158,7 +162,7 @@ async def refresh(authorize: AuthJWT = Depends(auth_dep)):
     return {"access_token": new_access_token}
 
 
-@router.post('/user_update', status_code=HTTPStatus.OK)
+@router.post('/user_update', status_code=HTTPStatus.OK, dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 async def change_user_data(
         user_input_data: UserUpdate,
         authorize: AuthJWT = Depends(auth_dep),
@@ -175,7 +179,8 @@ async def change_user_data(
     return {"detail": "Data were updated successfully"}
 
 
-@router.get('/user_login_history', response_model=Page[UserLoginHistoryInDB], status_code=HTTPStatus.OK)
+@router.get('/user_login_history', response_model=Page[UserLoginHistoryInDB], status_code=HTTPStatus.OK,
+            dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 async def get_user_login_history(
         authorize: AuthJWT = Depends(auth_dep),
         user_service: UserService = Depends(get_user_service),
@@ -189,7 +194,7 @@ async def get_user_login_history(
     return paginate(user_login_history)
 
 
-@router.get("/login_google")
+@router.get('/login_google', dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 async def login_google(
         request: Request,
 
@@ -199,7 +204,8 @@ async def login_google(
     return await oauth.google.authorize_redirect(request, redirect_url)
 
 
-@router.get("/google_auth", response_model=JWTResponse, status_code=HTTPStatus.OK)
+@router.get('/google_auth', response_model=JWTResponse, status_code=HTTPStatus.OK,
+            dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 async def google_auth(
         request: Request,
         authorize: AuthJWT = Depends(auth_dep),
