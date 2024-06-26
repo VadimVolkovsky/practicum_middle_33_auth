@@ -15,7 +15,7 @@ services:
 
   admin_panel_nginx:
     ports:
-      - "80:80"
+      - "83:80"
     networks:
       - practicum_network
 
