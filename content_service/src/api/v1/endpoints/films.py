@@ -49,7 +49,8 @@ class FilmSerializer(FilmListSerializer):
 async def film_search(query: str,
                       paginated: PaginatedParams = Depends(get_paginated_params),
                       sort: OptStrType = None,
-                      film_service: FilmService = Depends(get_film_service)) -> list[FilmListSerializer]:
+                      film_service: FilmService = Depends(get_film_service),
+                      ) -> list[FilmListSerializer]:
     '''Метод для поиска подходящих по названию фильмов
     :param query: строка, по которой производится полнотекстовый поиск
     :param page_number: номер страницы

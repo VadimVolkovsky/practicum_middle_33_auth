@@ -6,6 +6,7 @@ import uvicorn
 from async_fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi import FastAPI, Request
 from fastapi.responses import ORJSONResponse
+from fastapi_limiter import FastAPILimiter
 from fastapi_pagination import add_pagination
 from opentelemetry import trace
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -39,8 +40,10 @@ async def lifespan(app: FastAPI):
         )
 
     redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
+    await FastAPILimiter.init(redis.redis)
     yield
     await redis.redis.close()
+    await FastAPILimiter.close()
 
 
 app = FastAPI(
