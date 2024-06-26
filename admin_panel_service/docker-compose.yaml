@@ -37,7 +37,7 @@ services:
     depends_on:
       - admin_panel_django
     ports:
-      - "83:80"
+      - "80:80"
     networks:
       - admin_panel_network
     container_name: admin_panel_nginx
