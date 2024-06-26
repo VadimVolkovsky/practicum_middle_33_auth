@@ -98,11 +98,14 @@ class UserLoginHistory(Base):
         }
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[User] = mapped_column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user = relationship('User', back_populates='login_history')
-    user_auth_service = Column(Text, primary_key=True, nullable=False)  # user_auth_service добавлен как часть первичного ключа
-    login_date = Column(DateTime, default=datetime.datetime.utcnow)
+    user_auth_service = Column(Text, primary_key=True, nullable=False)
+    login_date: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
 
     def __repr__(self):
         return f'<UserLoginHistory {self.user_id}:{self.login_date }>'
+
+    def __init__(self, user_id: User) -> None:
+        self.user_id = user_id
