@@ -5,11 +5,8 @@ from http import HTTPStatus
 from async_fastapi_jwt_auth import AuthJWT
 from async_fastapi_jwt_auth.auth_jwt import AuthJWTBearer
 from authlib.integrations.base_client.errors import OAuthError
-from core.schemas.entity import UserInDB, AdminInDB, UserCreate, UserLogin, JWTResponse, UserUpdate, \
-    UserLoginHistoryInDB
 from core.schemas.entity import (UserInDB, AdminInDB, UserCreate, UserLogin, JWTResponse, UserUpdate,
                                  UserLoginHistoryInDB)
-from db.postgres import get_session
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, paginate
 from sqlalchemy.ext.asyncio import AsyncSession

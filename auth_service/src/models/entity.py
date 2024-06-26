@@ -75,15 +75,15 @@ def create_partition(target, connection, **kw):
         перед выполнением команды flask db upgrade
      """
     connection.execute(
-        """CREATE TABLE IF NOT EXISTS "user_login_history_site" 
+        """CREATE TABLE IF NOT EXISTS "user_login_history_site"
         PARTITION OF "user_login_history" FOR VALUES IN ('site')"""
     )
     connection.execute(
-        """CREATE TABLE IF NOT EXISTS "user_login_history_social" 
+        """CREATE TABLE IF NOT EXISTS "user_login_history_social"
         PARTITION OF "user_login_history" FOR VALUES IN ('social')"""
     )
     connection.execute(
-        """CREATE TABLE IF NOT EXISTS "user_login_history_auth" 
+        """CREATE TABLE IF NOT EXISTS "user_login_history_auth"
         PARTITION OF "user_login_history" FOR VALUES IN ('auth')"""
     )
 
@@ -99,13 +99,14 @@ class UserLoginHistory(Base):
     )
 
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id: Mapped[User] = mapped_column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    user_id: Mapped[User] = mapped_column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'),
+                                          nullable=False)
     user = relationship('User', back_populates='login_history')
     user_auth_service = Column(Text, primary_key=True, nullable=False)
     login_date: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.utcnow)
 
     def __repr__(self):
-        return f'<UserLoginHistory {self.user_id}:{self.login_date }>'
+        return f'<UserLoginHistory {self.user_id}:{self.login_date}:{self.user_auth_service}>'
 
     def __init__(self, user_id: User) -> None:
         self.user_id = user_id
