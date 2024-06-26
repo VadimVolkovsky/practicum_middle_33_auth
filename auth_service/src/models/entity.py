@@ -9,7 +9,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from db.postgres import get_session
 
-from src.models import Base
+from src.db.postgres import Base
 
 
 class Roles(Enum):
