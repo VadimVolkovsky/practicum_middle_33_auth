@@ -3,7 +3,7 @@ import datetime
 import uuid
 from enum import Enum
 
-from sqlalchemy import String, ForeignKey, UniqueConstraint, Text
+from sqlalchemy import String, ForeignKey, UniqueConstraint, Text, Column, DateTime, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -68,7 +68,7 @@ class User(Base):
         return f'<User {self.email}>'
 
 
-def create_partition(target, connection, **kw) -> None:
+def create_partition(target, connection, **kw):
     """ Создает партицирование в модели user_history.
         Не создается в автоматических миграциях,
         необходимо дописывать руками migrations/versions,
@@ -87,23 +87,22 @@ def create_partition(target, connection, **kw) -> None:
         PARTITION OF "user_login_history" FOR VALUES IN ('auth')"""
     )
 
+
 class UserLoginHistory(Base):
     __tablename__ = 'user_login_history'
     __table_args__ = (
-        UniqueConstraint('id', 'user_auth_service'),
+        UniqueConstraint('id', 'user_auth_service'),  # Включаем user_auth_service в уникальное ограничение
         {
             'postgresql_partition_by': 'LIST (user_auth_service)',
             'listeners': [('after_create', create_partition)],
         }
     )
 
-    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
-    user_id: Mapped[User] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     user = relationship('User', back_populates='login_history')
-    user_auth_service = mapped_column(Text, primary_key=True)
-
-    def __init__(self, user_id: User) -> None:
-        self.user_id = user_id
+    user_auth_service = Column(Text, primary_key=True, nullable=False)  # user_auth_service добавлен как часть первичного ключа
+    login_date = Column(DateTime, default=datetime.datetime.utcnow)
 
     def __repr__(self):
         return f'<UserLoginHistory {self.user_id}:{self.login_date }>'
