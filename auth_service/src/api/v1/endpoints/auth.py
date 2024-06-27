@@ -204,9 +204,11 @@ async def social_network_auth(
 ):
     """Redirect URL для авторизации через социальные сети"""
     try:
-        if SocialNetworksEnum.GOOGLE.value in next(iter(request.session.keys())): #  TODO спросить как лучше проверять из какой соц сети пришел request # noqa
-            token = await oauth.google.authorize_access_token(request)
-            social_network = SocialNetworksEnum.GOOGLE.value
+        for request_session in request.session.keys():  # TODO есть ли другие варианты проверки источника запроса?
+            if SocialNetworksEnum.GOOGLE.value in request_session:
+                token = await oauth.google.authorize_access_token(request)
+                social_network = SocialNetworksEnum.GOOGLE.value
+                break
         else:
             raise HTTPException(detail='Авторизация через другие соц.сети пока не поддерживается')
     except OAuthError as error:
