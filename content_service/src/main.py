@@ -6,6 +6,7 @@ import uvicorn
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI, Request
 from fastapi.responses import ORJSONResponse
+from fastapi_limiter import FastAPILimiter
 from opentelemetry import trace
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from redis.asyncio import Redis
@@ -30,9 +31,11 @@ async def lifespan(app: FastAPI):
         )
 
     redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
+    await FastAPILimiter.init(redis.redis)
     elastic.es = AsyncElasticsearch(hosts=[f'{app_settings.elastic_host}:{app_settings.elastic_port}'])
     yield
     await redis.redis.close()
+    await FastAPILimiter.close()
     await elastic.es.close()
 
 

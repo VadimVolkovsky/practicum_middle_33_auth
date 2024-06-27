@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_limiter.depends import RateLimiter
 from pydantic import BaseModel
 
 from db.elastic import Indexes
@@ -17,6 +18,7 @@ class GenreSerializer(BaseModel):
 
 
 @router.get('/{genre_id}', response_model=GenreSerializer,
+            dependencies=[Depends(RateLimiter(times=2, seconds=5))],
             description="""Выполните запрос на поиск жанра по его id,
             В случае отсутствия жанра с указанным id - возвращает код ответа 404""")
 async def genre_details(genre_id: str, genre_service: GenreService = Depends(get_genre_service)) -> GenreSerializer:

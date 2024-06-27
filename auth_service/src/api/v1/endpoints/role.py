@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_limiter.depends import RateLimiter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1.serializers.role_serializer import RoleSerializer, RoleCreateSerializer, AssignRoleSerializer
@@ -14,7 +15,8 @@ from services.user_service import UserService, get_user_service
 router = APIRouter()
 
 
-@router.get('', response_model=list[RoleSerializer], status_code=HTTPStatus.OK)
+@router.get('', response_model=list[RoleSerializer], status_code=HTTPStatus.OK,
+            dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 @roles_required(roles_list=[Roles.admin.value])
 async def get_roles(request: AuthRequest,
                     role_service: RoleService = Depends(get_role_service),
@@ -24,7 +26,8 @@ async def get_roles(request: AuthRequest,
     return await role_service.get_list(session)
 
 
-@router.post('/create', response_model=RoleSerializer, status_code=HTTPStatus.CREATED)
+@router.post('/create', response_model=RoleSerializer, status_code=HTTPStatus.CREATED,
+             dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 @roles_required(roles_list=[Roles.admin.value])
 async def create_role(request: AuthRequest,
                       role_data: RoleCreateSerializer,
@@ -38,7 +41,8 @@ async def create_role(request: AuthRequest,
     return await role_service.create(role_data, session)
 
 
-@router.post('/assign_user', response_model=AssignRoleSerializer, status_code=HTTPStatus.OK)
+@router.post('/assign_user', response_model=AssignRoleSerializer, status_code=HTTPStatus.OK,
+             dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 @roles_required(roles_list=[Roles.admin.value])
 async def add_role_user(request: AuthRequest,
                         email: str,
@@ -59,7 +63,8 @@ async def add_role_user(request: AuthRequest,
     )
 
 
-@router.post('/cancel_user', response_model=AssignRoleSerializer, status_code=HTTPStatus.OK)
+@router.post('/cancel_user', response_model=AssignRoleSerializer, status_code=HTTPStatus.OK,
+             dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 @roles_required(roles_list=[Roles.admin.value])
 async def revoke_role(request: AuthRequest,
                       email: str,
