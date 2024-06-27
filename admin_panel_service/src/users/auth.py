@@ -1,11 +1,14 @@
 import http
 import json
+import logging
 from enum import StrEnum, auto
+from urllib.request import Request
 
 import requests
 from django.conf import settings
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth import get_user_model
+from requests import TooManyRedirects, RequestException, Timeout
 
 User = get_user_model()
 
@@ -16,10 +19,17 @@ class Roles(StrEnum):
 
 
 class CustomBackend(BaseBackend):
-    def authenticate(self, request, username=None, password=None):
+    def authenticate(self, request: Request, username: str =None, password: str =None):
         url = settings.AUTH_ADMIN_LOGIN_URL
         payload = {'email': username, 'password': password}
         response = requests.post(url, data=json.dumps(payload))
+
+        try:
+            response = requests.post(url, data=json.dumps(payload))
+        except (TooManyRedirects, RequestException, Timeout):
+            logging.error('Auth service not working!')
+            return None
+
         if response.status_code != http.HTTPStatus.OK:
             return None
 
