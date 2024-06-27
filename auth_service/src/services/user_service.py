@@ -4,17 +4,19 @@ from http import HTTPStatus
 
 from async_fastapi_jwt_auth import AuthJWT
 from authlib.oidc.core import UserInfo
-
-from core.schemas.entity import UserCreate, UserUpdate, UserLoginHistory, UserLoginHistoryInDB, UserInDB, JWTResponse
 from fastapi import Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 from werkzeug.security import generate_password_hash
 
+from core.schemas.entity import UserCreate, UserUpdate, UserLoginHistory, UserLoginHistoryInDB, UserInDB, JWTResponse, \
+    UserSocialNetwork
+from crud.social_network import social_network_crud
 from crud.user import user_crud
 from crud.user_history import user_login_history_crud
-from models.entity import User
+from crud.user_social_networks import user_social_networks_crud
+from models.entity import User, SocialNetwork
 from services.redis import get_redis
 
 
@@ -97,10 +99,46 @@ class UserService:
         )
         return JWTResponse(access_token=access_token, refresh_token=refresh_token)
 
+    async def add_user_social_network(
+            self,
+            session: AsyncSession,
+            user: UserInDB,
+            social_network: str,
+    ):
+        """
+        Привязываем соц сеть к пользователю в БД.
+        Если указанная соц сеть уже привязана к пользователю - пропускаем данный шаг
+        """
+        if not (social_network_obj := await self.check_user_social_network_exists(session, user, social_network)):
+            obj_in = UserSocialNetwork(user_id=user.id, social_network_id=social_network_obj.id)
+            await user_social_networks_crud.create(obj_in, session)
+
+    @staticmethod
+    async def check_user_social_network_exists(
+            session: AsyncSession,
+            user: UserInDB,
+            social_network: str,
+    ) -> bool | SocialNetwork:
+        """
+        Проверяем привязана ли указанная соц сеть к пользователю.
+        Если да - возвращам объект соц сети
+        Если нет - возвращаем False
+        """
+        social_network_obj = await social_network_crud.get_by_attribute('name', social_network, session)
+        user_social_networks_objects = await user_social_networks_crud.get_user_social_networks(
+            user_id=user.id,
+            session=session
+        )
+        for user_social_network_obj in user_social_networks_objects:
+            if social_network_obj.id == user_social_network_obj.social_network_id:
+                return social_network_obj
+        return False
+
     async def login_user_with_social_network(
             self,
             session: AsyncSession,
             user: UserInfo,
+            social_network: str,
             authorize: AuthJWT,
     ) -> JWTResponse:
         """Авторизация юзера через социальные сети и выдача ему токенов"""
@@ -123,7 +161,7 @@ class UserService:
                 last_name=user.family_name,
             )
             user_from_db = await self.create_user(user_create_scheme, session)
-
+        await self.add_user_social_network(session, user_from_db, social_network)
         await self.add_user_login_history(user_from_db.email, session)
         return await self.create_jwt_tokens(user_from_db, authorize)
 

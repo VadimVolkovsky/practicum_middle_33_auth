@@ -8,8 +8,9 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-from src.core.config import app_settings
-from src.db.postgres import Base
+from core.config import app_settings
+from db.postgres import Base
+from models.entity import User, UserLoginHistory, Role, UserSocialNetworks
 
 load_dotenv('.env')
 
@@ -18,7 +19,6 @@ load_dotenv('.env')
 config = context.config
 
 # Установим для переменной sqlalchemy.url значение из нашего .env файла.
-# config.set_main_option('sqlalchemy.url', os.environ['DATABASE_URL'])
 config.set_main_option('sqlalchemy.url', app_settings.database_url)
 
 # Interpret the config file for Python logging.
