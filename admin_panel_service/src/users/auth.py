@@ -8,8 +8,7 @@ import requests
 from django.conf import settings
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth import get_user_model
-from httpx import TooManyRedirects, Timeout
-from pip._vendor.requests import RequestException
+from requests import TooManyRedirects, RequestException, Timeout
 
 User = get_user_model()
 
