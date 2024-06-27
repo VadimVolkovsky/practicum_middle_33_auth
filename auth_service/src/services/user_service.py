@@ -109,7 +109,8 @@ class UserService:
         Привязываем соц сеть к пользователю в БД.
         Если указанная соц сеть уже привязана к пользователю - пропускаем данный шаг
         """
-        if not (social_network_obj := await self.check_user_social_network_exists(session, user, social_network)):
+        social_network_obj = await social_network_crud.get_by_attribute('name', social_network, session)
+        if not await self.check_user_social_network_exists(session, user, social_network_obj):
             obj_in = UserSocialNetwork(user_id=user.id, social_network_id=social_network_obj.id)
             await user_social_networks_crud.create(obj_in, session)
 
@@ -117,21 +118,21 @@ class UserService:
     async def check_user_social_network_exists(
             session: AsyncSession,
             user: UserInDB,
-            social_network: str,
-    ) -> bool | SocialNetwork:
+            social_network_obj: SocialNetwork,
+    ) -> bool:
         """
         Проверяем привязана ли указанная соц сеть к пользователю.
-        Если да - возвращам объект соц сети
-        Если нет - возвращаем False
+        # Если да - возвращам объект соц сети
+        # Если нет - возвращаем False
         """
-        social_network_obj = await social_network_crud.get_by_attribute('name', social_network, session)
+
         user_social_networks_objects = await user_social_networks_crud.get_user_social_networks(
             user_id=user.id,
             session=session
         )
         for user_social_network_obj in user_social_networks_objects:
             if social_network_obj.id == user_social_network_obj.social_network_id:
-                return social_network_obj
+                return True
         return False
 
     async def login_user_with_social_network(
