@@ -18,6 +18,7 @@ from starlette.requests import Request
 from core.config import AppSettings, app_settings
 from db.postgres import get_session
 from helperes.google_auth import oauth
+from models.entity import SocialNetworksEnum
 from services import redis
 from services.user_service import get_user_service, UserService
 
@@ -62,7 +63,7 @@ async def login(
     """
     if not await user_service.check_user_credentials(user.email, user.password, session):
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Bad email or password")
-    access_token = await authorize.create_access_token(subject=user.email)
+    access_token = await authorize.create_access_token(subject=user.email)   # TODO заменить на метод create_jwt_tokens из user_service
     raw_jwt = await authorize.get_raw_jwt(encoded_token=access_token)
     access_token_jti = raw_jwt['jti']
 
@@ -87,14 +88,6 @@ async def login_admin(
     """
     if not await user_service.check_user_credentials(user.email, user.password, session):
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Bad email or password")
-    # access_token = await authorize.create_access_token(subject=user.email)
-    # raw_jwt = await authorize.get_raw_jwt(encoded_token=access_token)
-    # access_token_jti = raw_jwt['jti']
-
-    # refresh_token = await authorize.create_refresh_token(
-    #     subject=user.email,
-    #     user_claims={'access_token_jti': access_token_jti}
-    # )
     user_from_db = await user_service.get_user_by_email(user.email, session)
     if user_from_db.role.name != 'admin':
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='Only admin can access this URL')
@@ -189,59 +182,40 @@ async def get_user_login_history(
     return paginate(user_login_history)
 
 
-@router.get("/login_google")
-async def login_google(
+@router.get("/login_social_network")
+async def login_social_network(
         request: Request,
-
+        social_network: str
 ):
-    """Эндпоинт для авторизации через Google"""
+    """Эндпоинт для авторизации через социальные сети"""
     redirect_url = app_settings.redirect_url
-    return await oauth.google.authorize_redirect(request, redirect_url)
+    if social_network == 'google':
+        return await oauth.google.authorize_redirect(request, redirect_url)
+    else:
+        raise HTTPException(detail=f'Авторизация через {social_network} пока не реализована')
 
 
-@router.get("/google_auth", response_model=JWTResponse, status_code=HTTPStatus.OK)
-async def google_auth(
+@router.get("/social_network_auth", response_model=JWTResponse, status_code=HTTPStatus.OK)
+async def social_network_auth(
         request: Request,
         authorize: AuthJWT = Depends(auth_dep),
         user_service: UserService = Depends(get_user_service),
         session: AsyncSession = Depends(get_session),
-
 ):
-    """Redirect URL для авторизации через Google"""
+    """Redirect URL для авторизации через социальные сети"""
     try:
-        token = await oauth.google.authorize_access_token(request)
+        if SocialNetworksEnum.GOOGLE.value in next(iter(request.session.keys())): #  TODO спросить как лучше проверять из какой соц сети пришел request # noqa
+            token = await oauth.google.authorize_access_token(request)
+            social_network = SocialNetworksEnum.GOOGLE.value
+        else:
+            raise HTTPException(detail='Авторизация через другие соц.сети пока не поддерживается')
     except OAuthError as error:
         raise Exception(error)
+
     user = token.get('userinfo')
     if user:
         request.session['user'] = dict(user)
 
-    try:
-        # если юзер с такой почтой уже есть в БД - логиним его в эту учетку.
-        # (в след спринтах будет подтверждение входа паролем или отправка письма на почту)
-        user_from_db = await user_service.get_user_by_email(user.email, session)
-    except HTTPException:
-        # если юзера в БД нет, создаем нового юзера с рандомным паролем.
-        # Юзер сможет сменить рандомный пароль  через "восстановление пароля" в след спринтах,
-        # Либо продолжить логиниться через google.
-        password_length = 13
-        random_password = secrets.token_urlsafe(password_length)
-        user_create_scheme = UserCreate(
-            email=user.email,
-            password=random_password,
-            first_name=user.given_name,
-            last_name=user.family_name,
-        )
-        user_from_db = await user_service.create_user(user_create_scheme, session)
+    return await user_service.login_user_with_social_network(session, user, social_network, authorize)
 
-    # выдаем юзеру акссес и рефреш токены
-    access_token = await authorize.create_access_token(subject=user_from_db.email)
-    raw_jwt = await authorize.get_raw_jwt(encoded_token=access_token)
-    access_token_jti = raw_jwt['jti']
 
-    refresh_token = await authorize.create_refresh_token(
-        subject=user_from_db.email,
-        user_claims={'access_token_jti': access_token_jti}
-    )
-    await user_service.add_user_login_history(user_from_db.email, session)
-    return JWTResponse(access_token=access_token, refresh_token=refresh_token)
