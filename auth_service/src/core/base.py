@@ -1,3 +1,7 @@
 """Импорты класса Base и всех моделей для Alembic."""
-from db.postgres import Base  # noqa
-from models.entity import User, Role, UserLoginHistory  # noqa
+
+from sqlalchemy.orm import declarative_base
+
+Base = declarative_base()
+
+from src.models.entity import Role, User, UserLoginHistory # noqa

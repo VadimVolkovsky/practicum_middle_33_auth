@@ -34,7 +34,8 @@ test:
 	$(EXEC_CORE) pytest
 
 makemigrations_auth:
-	$(EXEC_CORE) alembic revision --autogenerate
+	$(EXEC_CORE) alembic revision --autogenerate -m "$(NAME)"
+#     example make makemigrations_auth NAME='Init database'
 
 migrate_auth:
 	$(EXEC_CORE) alembic upgrade head

@@ -33,8 +33,10 @@ def get_config():
 async def check_if_token_in_denylist(decrypted_token):
     jti = decrypted_token['jti']
     entry = await redis.redis.get(jti)
+
     if entry:
         entry = entry.decode()
+
     return entry and entry == 'true'
 
 
@@ -71,6 +73,7 @@ async def login(
     """
     if not await user_service.check_user_credentials(user.email, user.password, session):
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Bad email or password")
+
     access_token = await authorize.create_access_token(
         subject=user.email)  # TODO заменить на метод create_jwt_tokens из user_service
     raw_jwt = await authorize.get_raw_jwt(encoded_token=access_token)
@@ -80,7 +83,8 @@ async def login(
         subject=user.email,
         user_claims={'access_token_jti': access_token_jti}
     )
-    await user_service.add_user_login_history(user.email, session)
+    await user_service.add_user_login_history(user.email, 'admin', session)
+
     return JWTResponse(access_token=access_token, refresh_token=refresh_token)
 
 
@@ -102,10 +106,14 @@ async def login_admin(
     """
     if not await user_service.check_user_credentials(user.email, user.password, session):
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Bad email or password")
+
     user_from_db = await user_service.get_user_by_email(user.email, session)
+
     if user_from_db.role.name != 'admin':
         raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='Only admin can access this URL')
-    await user_service.add_user_login_history(user.email, session)
+
+    await user_service.add_user_login_history(user.email, 'site', session)
+
     return AdminInDB(
         id=user_from_db.id,
         first_name=user_from_db.first_name,
@@ -130,11 +138,13 @@ async def check_token(
     raw_jwt = await authorize.get_raw_jwt()
     token_expire_date = raw_jwt["exp"]
     time_now = datetime.datetime.utcnow().timestamp()
+
     if time_now >= token_expire_date:
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Token expired")
 
     email = raw_jwt['sub']
     user = await user_service.get_user_by_email(email, session)
+
     return {'email': user.email, 'role': user.role.name}
 
 
@@ -206,9 +216,9 @@ async def login_social_network(
         request: Request,
         social_network: str
 ):
-    """Эндпоинт для авторизации через Google"""
     """Эндпоинт для авторизации через социальные сети"""
     redirect_url = app_settings.redirect_url
+
     if social_network == 'google':
         return await oauth.google.authorize_redirect(request, redirect_url)
     else:
@@ -240,6 +250,7 @@ async def social_network_auth(
         raise Exception(error)
 
     user = token.get('userinfo')
+
     if user:
         request.session['user'] = dict(user)
 
