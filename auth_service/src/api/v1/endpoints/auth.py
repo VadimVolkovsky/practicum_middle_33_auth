@@ -165,7 +165,7 @@ async def refresh(authorize: AuthJWT = Depends(auth_dep)):
     return {"access_token": new_access_token}
 
 
-@router.post('/user_update', status_code=HTTPStatus.OK, dependencies=[Depends(RateLimiter(times=2, seconds=5))], )
+@router.post('/user_update', status_code=HTTPStatus.OK, dependencies=[Depends(RateLimiter(times=2, seconds=5))],)
 async def change_user_data(
         user_input_data: UserUpdate,
         authorize: AuthJWT = Depends(auth_dep),
