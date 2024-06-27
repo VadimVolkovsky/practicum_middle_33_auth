@@ -60,6 +60,16 @@ make makemigrations
 make migrate
 ```
 
+#### Создание ролей пользователей:
+```shell script
+make roles_auth
+```
+
+#### Создание социальных сетей:
+```shell script
+make social_networks_auth
+```
+
 #### Создание супер пользователя:
 ```shell script
 make superuser

@@ -29,6 +29,11 @@ make migrate_auth
 make roles_auth
 ```
 
+Создать дефолтные соц сети в сервисе auth
+```shell
+make social_networks_auth
+```
+
 Создать суперюзера в сервисе auth
 ```shell
 make superuser_auth

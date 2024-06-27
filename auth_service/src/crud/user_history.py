@@ -11,7 +11,6 @@ class CRUDUserLoginHistory(CRUDBase):
     async def get_user_login_history(self, user: User, session: AsyncSession) -> UserLoginHistory:
         """
         Метод для получения истории входов пользователя.
-        По умолчанию возвращается 5 последних входов
         """
         db_obj = await session.execute(
             select(self.model)

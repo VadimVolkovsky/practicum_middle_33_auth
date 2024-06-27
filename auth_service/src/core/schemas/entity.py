@@ -56,6 +56,11 @@ class UserLoginHistoryInDB(BaseModel):
     login_date: datetime.datetime
 
 
+class UserSocialNetwork(BaseModel):
+    user_id: UUID
+    social_network_id: int
+
+
 class JWTResponse(BaseModel):
     """Модель для работы с токенами"""
     access_token: str
