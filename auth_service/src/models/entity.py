@@ -18,6 +18,12 @@ class Roles(Enum):
     admin: str = 'admin'
 
 
+class SocialNetworksEnum(Enum):
+    GOOGLE: str = 'google'
+    YANDEX: str = 'yandex'
+    VK: str = 'vk'
+
+
 # получение DI через контекстный менеджер
 get_async_session_context = contextlib.asynccontextmanager(get_session)
 
@@ -110,3 +116,23 @@ class UserLoginHistory(Base):
 
     def __init__(self, user_id: User) -> None:
         self.user_id = user_id
+
+
+class SocialNetwork(Base):
+    __tablename__ = 'social_networks'
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(String(20))
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+
+class UserSocialNetworks(Base):
+    __tablename__ = 'user_social_networks'
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    user_id: Mapped[User] = mapped_column(ForeignKey('users.id'), nullable=False)
+    user = relationship('User')
+    social_network_id: Mapped[SocialNetwork] = mapped_column(ForeignKey('social_networks.id'), nullable=False)
+    social_network = relationship("SocialNetwork", lazy="selectin")
+

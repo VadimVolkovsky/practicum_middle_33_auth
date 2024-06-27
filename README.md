@@ -29,6 +29,11 @@ make migrate_auth
 make roles_auth
 ```
 
+Создать дефолтные соц сети в сервисе auth
+```shell
+make social_networks_auth
+```
+
 Создать суперюзера в сервисе auth
 ```shell
 make superuser_auth
@@ -39,3 +44,10 @@ make superuser_auth
 ```
 http://0.0.0.0:16686/search
 ```
+
+
+
+Особенности проекта:
+
+- На всех нагруженных эндпоинтах реализован Rate Limit через библиотеку fastapi_limiter
+- Авторизация через социальные сети

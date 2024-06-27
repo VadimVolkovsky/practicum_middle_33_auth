@@ -9,9 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 from src.core.config import app_settings
-
 from src.models.entity import Role, User, UserLoginHistory # noqa
-
 from src.db.postgres import Base
 
 load_dotenv('.env')

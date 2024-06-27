@@ -43,5 +43,9 @@ migrate_auth:
 roles_auth:
 	$(EXEC_CORE) python src/create_roles.py
 
+social_networks_auth:
+	$(EXEC_CORE) python src/create_social_networks.py
+
 superuser_auth:
 	$(EXEC_CORE) python src/superuser.py
+
